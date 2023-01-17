@@ -2,48 +2,32 @@ from functools import lru_cache
 from typing import Optional
 
 from fastapi import Depends
-from sqlmodel import Session, select
+from sqlmodel import Session
 
-from api.v1.schemas.menus import MenuBase, UpdateMenu
+from api.v1.schemas.menus import MenuBase, MenuUpdate
 from db.db import get_session
-from db.mixin import ServiceMixin
+from db.mixin_db_service import CRUDDBServiceMixin
 from models.menu import Menu
 
 
-class MenuDbService(ServiceMixin):
-    def create_menu(self, menu: MenuBase) -> Menu:
-        new_menu = Menu(title=menu.title, description=menu.description)
-        self.session.add(new_menu)
-        self.session.commit()
-        self.session.refresh(new_menu)
-        return new_menu
+class MenuDbService(CRUDDBServiceMixin):
+    def __init__(self, session: Session):
+        super().__init__(session, Menu)
 
-    def list_menu(self) -> list[Menu]:
-        results = self.session.exec(select(Menu)).all()
-        return results
+    def create_item(self, menu: MenuBase) -> Menu:
+        return super().create_item(menu)
 
-    def get_menu_by_id(self, id: str) -> Optional[Menu]:
-        user = self.session.get(Menu, id)
-        return user
+    def list_items(self) -> list[Menu]:
+        return super().list_items()
 
-    def update_menu(self, id: str, update_menu: UpdateMenu) -> Optional[Menu]:
-        current_menu = self.get_menu_by_id(id)
-        update_menu = update_menu.dict(exclude_unset=True)
-        if current_menu:
-            for key, value in update_menu.items():
-                setattr(current_menu, key, value)
-            self.session.add(current_menu)
-            self.session.commit()
-            self.session.refresh(current_menu)
-        return current_menu
+    def get_item_by_id(self, id: str) -> Optional[Menu]:
+        return super().get_item_by_id(id)
 
-    def delete_menu(self, id: str) -> bool:
-        current_menu = self.get_menu_by_id(id)
-        if current_menu:
-            self.session.delete(current_menu)
-            self.session.commit()
-            return True
-        return False
+    def update_item(self, id: str, update_menu: MenuUpdate) -> Optional[Menu]:
+        return super().update_item(id, update_menu)
+
+    def delete_item(self, id: str) -> bool:
+        return super().delete_item(id)
 
 
 @lru_cache

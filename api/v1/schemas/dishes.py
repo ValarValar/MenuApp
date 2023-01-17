@@ -1,18 +1,20 @@
 from typing import Optional
+from uuid import UUID
 
 from pydantic import BaseModel
-from pydantic.types import UUID
 
 
-class MenuBase(BaseModel):
+class DishBase(BaseModel):
     title: str
     description: str
+    price: str
 
 
-class MenuCreate(MenuBase):
+class DishCreate(DishBase):
     id: UUID
 
 
-class MenuUpdate(BaseModel):
+class DishUpdate(BaseModel):
     title: Optional[str]
     description: Optional[str]
+    price: Optional[str]
