@@ -1,0 +1,44 @@
+import uvicorn
+from fastapi import FastAPI
+
+from api.v1.resources.menus import router as menus_router
+from core.config import get_settings
+
+settings = get_settings()
+
+app = FastAPI(
+    title=settings.APP_NAME,
+    docs_url=f"{settings.API_V1_STR}/openapi",
+    redoc_url=f"{settings.API_V1_STR}/redoc",
+    # Адрес документации в формате OpenAPI
+    openapi_url=f"{settings.API_V1_STR}/openapi.json",
+)
+
+
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
+
+@app.on_event("startup")
+async def startup_db_client():
+    pass
+
+
+@app.on_event("shutdown")
+async def shutdown_db_client():
+    pass
+
+
+app.include_router(router=menus_router, prefix=f"{settings.API_V1_STR}/menus")
+
+if __name__ == "__main__":
+    # Приложение может запускаться командой
+    # `uvicorn main:app --host 0.0.0.0 --port 8000`
+    # но чтобы не терять возможность использовать дебагер,
+    # запустим uvicorn сервер через python
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=8000,
+    )
