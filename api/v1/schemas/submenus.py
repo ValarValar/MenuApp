@@ -9,10 +9,6 @@ class SubmenuBase(BaseModel):
     description: str
 
 
-class SubmenuForCreate(SubmenuBase):
-    menu_id: UUID
-
-
 class SubmenuCreate(SubmenuBase):
     id: UUID
 

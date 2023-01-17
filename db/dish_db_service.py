@@ -2,32 +2,56 @@ from functools import lru_cache
 from typing import Optional
 
 from fastapi import Depends
-from sqlmodel import Session
+from sqlmodel import Session, select
 
-from api.v1.schemas.dishes import DishUpdate, DishBase
+from api.v1.schemas.dishes import DishBase, DishUpdate
 from db.db import get_session
-from db.mixin_db_service import CRUDDBServiceMixin
-from models import Dish
+from db.mixin import ServiceMixin
+from models import Dish, Submenu
 
 
-class DishDbService(CRUDDBServiceMixin):
-    def __init__(self, session: Session):
-        super().__init__(session, Dish)
+class DishDbService(ServiceMixin):
+    def create_dish(self, dish: DishBase, submenu_id: str) -> Dish:
+        new_dish = Dish(submenu_id=submenu_id, **dish.dict())
+        self.session.add(new_dish)
+        self.session.commit()
+        self.session.refresh(new_dish)
+        return new_dish
 
-    def create_item(self, dish: DishBase) -> Dish:
-        return super().create_item(dish)
+    def list_dishes(self, menu_id: str, submenu_id: str) -> list[Dish]:
+        statement = select(Dish).join(Submenu)\
+            .where(Dish.submenu_id == submenu_id)\
+            .where(Submenu.menu_id == menu_id)
+        results = self.session.exec(statement).all()
+        return results
 
-    def list_items(self) -> list[Dish]:
-        return super().list_items()
+    def get_dish_by_ids(self, menu_id: str, submenu_id: str, dish_id: str) -> Optional[Dish]:
+        statement = select(Dish).join(Submenu) \
+            .where(Dish.submenu_id == submenu_id)\
+            .where(Submenu.menu_id == menu_id) \
+            .where(Dish.id == dish_id)
+        results = self.session.exec(statement).first()
+        return results
 
-    def get_item_by_id(self, id: str) -> Optional[Dish]:
-        return super().get_item_by_id(id)
 
-    def update_item(self, id: str, update_dish: DishUpdate) -> Optional[Dish]:
-        return super().update_item(id, update_dish)
+    def update_dish(self, menu_id: str, submenu_id: str, dish_id: str, update_submenu: DishUpdate) -> Optional[Dish]:
+        current_dish = self.get_dish_by_ids(menu_id, submenu_id, dish_id)
+        if current_dish:
+            update_menu = update_submenu.dict(exclude_unset=True)
+            for key, value in update_menu.items():
+                setattr(current_dish, key, value)
+            self.session.add(current_dish)
+            self.session.commit()
+            self.session.refresh(current_dish)
+        return current_dish
 
-    def delete_item(self, id: str) -> bool:
-        return super().delete_item(id)
+    def delete_dish(self, menu_id: str, submenu_id: str, dish_id: str, ) -> bool:
+        current_dish = self.get_dish_by_ids(menu_id, submenu_id, dish_id)
+        if current_dish:
+            self.session.delete(current_dish)
+            self.session.commit()
+            return True
+        return False
 
 
 @lru_cache

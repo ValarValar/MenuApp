@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from api.v1.schemas.dishes import DishCreate, DishUpdate, DishBase
 from db.dish_db_service import DishDbService, get_dish_db_service
+from db.submenu_db_service import SubmenuDbService, get_submenu_db_service
 
 router = APIRouter()
 
@@ -12,8 +13,18 @@ router = APIRouter()
     response_model=DishCreate,
     status_code=201
 )
-def create_dish(dish: DishBase, dish_db: DishDbService = Depends(get_dish_db_service)):
-    created_dish = dish_db.create_item(dish).dict()
+def create_dish(
+        menu_id: str,
+        submenu_id: str,
+        dish: DishBase,
+        dish_db: DishDbService = Depends(get_dish_db_service),
+        submenu_db: SubmenuDbService = Depends(get_submenu_db_service),
+):
+    submenu = submenu_db.get_submenu_by_ids(menu_id, submenu_id)
+    if not submenu:
+        raise HTTPException(status_code=404, detail="submenu not found")
+
+    created_dish = dish_db.create_dish(dish, submenu_id).dict()
     return DishCreate(**created_dish)
 
 
@@ -22,9 +33,18 @@ def create_dish(dish: DishBase, dish_db: DishDbService = Depends(get_dish_db_ser
     summary="List dishs",
     response_model=list[DishBase],
 )
-def list_dish(dish_db: DishDbService = Depends(get_dish_db_service)):
-    dishs = dish_db.list_items()
-    return [DishBase(**dish.dict()) for dish in dishs]
+def list_dish(
+        menu_id: str,
+        submenu_id: str,
+        dish_db: DishDbService = Depends(get_dish_db_service),
+        submenu_db: SubmenuDbService = Depends(get_submenu_db_service),
+):
+    submenu = submenu_db.get_submenu_by_ids(menu_id, submenu_id)
+    if not submenu:
+        raise HTTPException(status_code=404, detail="submenu not found")
+
+    dishes = dish_db.list_dishes(menu_id, submenu_id)
+    return [DishBase(**dish.dict()) for dish in dishes]
 
 
 @router.get(
@@ -33,14 +53,17 @@ def list_dish(dish_db: DishDbService = Depends(get_dish_db_service)):
     response_model=DishCreate
 )
 def get_dish(
+        menu_id: str,
+        submenu_id: str,
         dish_id: str,
-        dish_db: DishDbService = Depends(get_dish_db_service)
+        dish_db: DishDbService = Depends(get_dish_db_service),
 ):
-    detailed_dish = dish_db.get_item_by_id(dish_id)
-    if detailed_dish:
-        return DishCreate(**detailed_dish.dict())
-    else:
+    detailed_dish = dish_db.get_dish_by_ids(menu_id, submenu_id, dish_id)
+
+    if not detailed_dish:
         raise HTTPException(status_code=404, detail="dish not found")
+
+    return DishCreate(**detailed_dish.dict())
 
 
 @router.patch(
@@ -49,15 +72,16 @@ def get_dish(
     response_model=DishCreate
 )
 def update_dish(
+        menu_id: str,
+        submenu_id: str,
         dish_id: str,
         new_dish: DishUpdate,
         dish_db: DishDbService = Depends(get_dish_db_service)
 ):
-    updated_dish = dish_db.update_item(dish_id, new_dish)
-    if updated_dish:
-        return DishCreate(**updated_dish.dict())
-    else:
+    updated_dish = dish_db.update_dish(menu_id, submenu_id, dish_id, new_dish)
+    if not updated_dish:
         raise HTTPException(status_code=404, detail="dish not found")
+    return DishCreate(**updated_dish.dict())
 
 
 @router.delete(
@@ -65,11 +89,13 @@ def update_dish(
     summary="Delete dish",
 )
 def delete_dish(
+        menu_id: str,
+        submenu_id: str,
         dish_id: str,
         dish_db: DishDbService = Depends(get_dish_db_service)
 ):
-    deleted_dish = dish_db.delete_item(dish_id)
-    if deleted_dish:
-        return {"ok": deleted_dish}
-    else:
+    deleted_dish = dish_db.delete_dish(menu_id, submenu_id, dish_id)
+    if not deleted_dish:
         raise HTTPException(status_code=404, detail="dish not found")
+
+    return {"ok": deleted_dish}

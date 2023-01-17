@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from api.v1.schemas.submenus import SubmenuCreate, SubmenuUpdate, SubmenuBase, SubmenuForCreate
+from api.v1.schemas.submenus import SubmenuCreate, SubmenuUpdate, SubmenuBase
+from db.menu_db_service import MenuDbService, get_menu_db_service
 from db.submenu_db_service import SubmenuDbService, get_submenu_db_service
 
 router = APIRouter()
@@ -16,9 +17,14 @@ router = APIRouter()
 def create_submenu(
         menu_id: str,
         submenu: SubmenuBase,
-        submenu_db: SubmenuDbService = Depends(get_submenu_db_service)):
-    submenu_with_menu_id = SubmenuForCreate(menu_id=menu_id, **submenu.dict())
-    created_submenu = submenu_db.create_item(submenu_with_menu_id).dict()
+        submenu_db: SubmenuDbService = Depends(get_submenu_db_service),
+        menu_db: MenuDbService = Depends(get_menu_db_service)
+):
+    menu = menu_db.get_menu_by_id(menu_id)
+    if not menu:
+        raise HTTPException(status_code=404, detail="menu not found")
+
+    created_submenu = submenu_db.create_submenu(submenu, menu_id).dict()
     return SubmenuCreate(**created_submenu)
 
 
@@ -28,8 +34,17 @@ def create_submenu(
     tags=["submenus"],
     response_model=list[SubmenuBase],
 )
-def list_submenu(submenu_db: SubmenuDbService = Depends(get_submenu_db_service)):
-    submenus = submenu_db.list_items()
+def list_submenu(
+        menu_id: str,
+        submenu_db: SubmenuDbService = Depends(get_submenu_db_service),
+        menu_db: MenuDbService = Depends(get_menu_db_service)
+):
+    menu = menu_db.get_menu_by_id(menu_id)
+    if not menu:
+        raise HTTPException(status_code=404, detail="menu not found")
+
+    submenus = submenu_db.list_submenus(menu_id)
+
     return [SubmenuBase(**submenu.dict()) for submenu in submenus]
 
 
@@ -40,14 +55,15 @@ def list_submenu(submenu_db: SubmenuDbService = Depends(get_submenu_db_service))
     response_model=SubmenuCreate
 )
 def get_submenu(
+        menu_id: str,
         submenu_id: str,
-        submenu_db: SubmenuDbService = Depends(get_submenu_db_service)
+        submenu_db: SubmenuDbService = Depends(get_submenu_db_service),
 ):
-    detailed_submenu = submenu_db.get_item_by_id(submenu_id)
-    if detailed_submenu:
-        return SubmenuCreate(**detailed_submenu.dict())
-    else:
+    detailed_submenu = submenu_db.get_submenu_by_ids(menu_id, submenu_id)
+    if not detailed_submenu:
         raise HTTPException(status_code=404, detail="submenu not found")
+
+    return SubmenuCreate(**detailed_submenu.dict())
 
 
 @router.patch(
@@ -57,16 +73,17 @@ def get_submenu(
     response_model=SubmenuCreate
 )
 def update_submenu(
+        menu_id: str,
         submenu_id: str,
         new_submenu: SubmenuUpdate,
-        menu_id: str,
         submenu_db: SubmenuDbService = Depends(get_submenu_db_service)
 ):
-    updated_submenu = submenu_db.update_item(submenu_id, new_submenu)
-    if updated_submenu:
-        return SubmenuCreate(**updated_submenu.dict())
-    else:
+    updated_submenu = submenu_db.update_submenu(menu_id, submenu_id, new_submenu)
+
+    if not updated_submenu:
         raise HTTPException(status_code=404, detail="submenu not found")
+
+    return SubmenuCreate(**updated_submenu.dict())
 
 
 @router.delete(
@@ -75,10 +92,11 @@ def update_submenu(
     tags=["submenus"]
 )
 def delete_submenu(
+        menu_id: str,
         submenu_id: str,
         submenu_db: SubmenuDbService = Depends(get_submenu_db_service)
 ):
-    deleted_submenu = submenu_db.delete_item(submenu_id)
+    deleted_submenu = submenu_db.delete_submenu(menu_id, submenu_id)
     if deleted_submenu:
         return {"ok": deleted_submenu}
     else:
