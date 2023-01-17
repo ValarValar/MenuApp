@@ -30,8 +30,19 @@ class MenuDbService(ServiceMixin):
         menu = self.session.get(Menu, id)
         return menu
 
-    def get_menu_by_id_with_counts(self, id:str):
-        statement = select(Menu)
+    def get_menu_by_id_with_counts(self, id: str):
+        """
+        not finished
+        :param id:
+        :return:
+        """
+        statement = select(Menu).where(Menu.id == id).join(Menu, Submenu).join(Dish)
+        results = self.session.exec(statement).all()
+        dishes_count = len(results)
+
+        statement = select(Menu).\
+            where(Menu.id == id).\
+            select(Menu.id, func.count(Menu.submenus)).group_by(Menu.id)
 
 
     def update_menu(self, id: str, update_menu: MenuUpdate) -> Optional[Menu]:
@@ -52,7 +63,6 @@ class MenuDbService(ServiceMixin):
             self.session.commit()
             return True
         return False
-
 
 
 @lru_cache

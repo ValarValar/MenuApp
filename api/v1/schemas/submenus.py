@@ -13,6 +13,10 @@ class SubmenuCreate(SubmenuBase):
     id: UUID
 
 
+class SubmenuWithCount(SubmenuCreate):
+    dishes_count: int
+
+
 class SubmenuUpdate(BaseModel):
     title: Optional[str]
     description: Optional[str]

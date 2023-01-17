@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from api.v1.schemas.menus import MenuCreate, MenuBase, MenuUpdate
+from api.v1.schemas.menus import MenuCreate, MenuBase, MenuUpdate, MenuWithCount
 from db.menu_db_service import get_menu_db_service, MenuDbService
 
 router = APIRouter()
@@ -33,7 +33,7 @@ def list_menu(menu_db: MenuDbService = Depends(get_menu_db_service)):
     path="/{menu_id}",
     summary="Detailed menu",
     tags=["menus"],
-    response_model=MenuCreate
+    response_model=MenuWithCount
 )
 def get_menu(
         menu_id: str,
@@ -42,7 +42,15 @@ def get_menu(
     detailed_menu = menu_db.get_menu_by_id(menu_id)
     if not detailed_menu:
         raise HTTPException(status_code=404, detail="menu not found")
-    return MenuCreate(**detailed_menu.dict())
+    submenus = detailed_menu.submenus
+    submenus_count = len(detailed_menu.submenus)
+    dishes_count = sum([len(submenu.dishes) for submenu in submenus])
+    response_model = MenuWithCount(
+        submenus_count=submenus_count,
+        dishes_count=dishes_count,
+        **detailed_menu.dict()
+    )
+    return response_model
 
 
 

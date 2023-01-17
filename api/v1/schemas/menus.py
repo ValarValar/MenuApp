@@ -13,6 +13,11 @@ class MenuCreate(MenuBase):
     id: UUID
 
 
+class MenuWithCount(MenuCreate):
+    submenus_count: int
+    dishes_count: int
+
+
 class MenuUpdate(BaseModel):
     title: Optional[str]
     description: Optional[str]

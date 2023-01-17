@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from api.v1.schemas.submenus import SubmenuCreate, SubmenuUpdate, SubmenuBase
+from api.v1.schemas.submenus import SubmenuCreate, SubmenuUpdate, SubmenuBase, SubmenuWithCount
 from db.menu_db_service import MenuDbService, get_menu_db_service
 from db.submenu_db_service import SubmenuDbService, get_submenu_db_service
 
@@ -52,7 +52,7 @@ def list_submenu(
     path="/{submenu_id}",
     summary="Detailed submenu",
     tags=["submenus"],
-    response_model=SubmenuCreate
+    response_model=SubmenuWithCount
 )
 def get_submenu(
         menu_id: str,
@@ -62,8 +62,8 @@ def get_submenu(
     detailed_submenu = submenu_db.get_submenu_by_ids(menu_id, submenu_id)
     if not detailed_submenu:
         raise HTTPException(status_code=404, detail="submenu not found")
-
-    return SubmenuCreate(**detailed_submenu.dict())
+    dishes_count = len(detailed_submenu.dishes)
+    return SubmenuWithCount(dishes_count=dishes_count, **detailed_submenu.dict())
 
 
 @router.patch(
