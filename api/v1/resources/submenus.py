@@ -32,7 +32,7 @@ def create_submenu(
     path="/",
     summary="List submenus",
     tags=["submenus"],
-    response_model=list[SubmenuBase],
+    response_model=list[SubmenuWithCount],
 )
 def list_submenu(
         menu_id: str,
@@ -44,8 +44,11 @@ def list_submenu(
         raise HTTPException(status_code=404, detail="menu not found")
 
     submenus = submenu_db.list_submenus(menu_id)
-
-    return [SubmenuBase(**submenu.dict()) for submenu in submenus]
+    response = []
+    for submenu in submenus:
+        dishes_count = len(submenu.dishes)
+        response.append(SubmenuWithCount(dishes_count=dishes_count, **submenu.dict()))
+    return response
 
 
 @router.get(

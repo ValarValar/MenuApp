@@ -2,6 +2,7 @@ from functools import lru_cache
 from typing import Optional
 
 from fastapi import Depends
+from sqlalchemy.orm import joinedload
 from sqlmodel import Session, select
 
 from api.v1.schemas.submenus import SubmenuBase, SubmenuUpdate
@@ -19,11 +20,20 @@ class SubmenuDbService(ServiceMixin):
         return new_submenu
 
     def list_submenus(self, menu_id: str) -> list[Submenu]:
-        results = self.session.exec(select(Submenu).where(Submenu.menu_id == menu_id)).all()
+        statement = select(Submenu).where(Submenu.menu_id == menu_id).options(joinedload(Submenu.dishes))
+        results = self.session.exec(statement).unique().all()
         return results
 
     def get_submenu_by_ids(self, menu_id: str, submenu_id: str) -> Optional[Submenu]:
         statement = select(Submenu).where(Submenu.menu_id == menu_id).where(Submenu.id == submenu_id)
+        submenu = self.session.exec(statement).first()
+        return submenu
+
+    def get_submenu_by_ids_with_count(self, menu_id: str, submenu_id: str) -> Optional[Submenu]:
+        statement = select(Submenu) \
+            .where(Submenu.menu_id == menu_id) \
+            .where(Submenu.id == submenu_id) \
+            .options(joinedload(Submenu.dishes))
         submenu = self.session.exec(statement).first()
         return submenu
 

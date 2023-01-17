@@ -3,8 +3,8 @@ from typing import Optional, List
 
 from sqlmodel import Field, Relationship
 
-from models.uuid import UUIDModel
 from models.menu import Menu
+from models.uuid import UUIDModel
 
 
 class Submenu(UUIDModel, table=True):

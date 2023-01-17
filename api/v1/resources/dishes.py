@@ -39,10 +39,10 @@ def list_dish(
         dish_db: DishDbService = Depends(get_dish_db_service),
         submenu_db: SubmenuDbService = Depends(get_submenu_db_service),
 ):
-    #Для прохождение теста закомментировано, но по логике если обращаемся к несуществующему меню, должна быть ошибка
-    #submenu = submenu_db.get_submenu_by_ids(menu_id, submenu_id)
-    #if not submenu:
-        #raise HTTPException(status_code=404, detail="submenu not found")
+    # Для прохождение теста закомментировано, но по логике если обращаемся к несуществующему меню, должна быть ошибка
+    # submenu = submenu_db.get_submenu_by_ids(menu_id, submenu_id)
+    # if not submenu:
+    # raise HTTPException(status_code=404, detail="submenu not found")
 
     dishes = dish_db.list_dishes(menu_id, submenu_id)
     return [DishBase(**dish.dict()) for dish in dishes]

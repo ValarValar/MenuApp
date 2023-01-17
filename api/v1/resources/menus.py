@@ -22,11 +22,22 @@ def create_menu(menu: MenuBase, menu_db: MenuDbService = Depends(get_menu_db_ser
     path="/",
     summary="List menus",
     tags=["menus"],
-    response_model=list[MenuBase],
+    response_model=list[MenuWithCount],
 )
 def list_menu(menu_db: MenuDbService = Depends(get_menu_db_service)):
     menus = menu_db.list_menu()
-    return [MenuBase(**menu.dict()) for menu in menus]
+    response = []
+    for menu in menus:
+        submenus = menu.submenus
+        submenus_count = len(submenus)
+        dishes_count = sum([len(submenu.dishes) for submenu in submenus])
+        response_model = MenuWithCount(
+            submenus_count=submenus_count,
+            dishes_count=dishes_count,
+            **menu.dict()
+        )
+        response.append(response_model)
+    return response
 
 
 @router.get(
@@ -39,11 +50,12 @@ def get_menu(
         menu_id: str,
         menu_db: MenuDbService = Depends(get_menu_db_service)
 ):
-    detailed_menu = menu_db.get_menu_by_id(menu_id)
+    detailed_menu = menu_db.get_menu_by_id_with_counts(menu_id)
     if not detailed_menu:
         raise HTTPException(status_code=404, detail="menu not found")
+
     submenus = detailed_menu.submenus
-    submenus_count = len(detailed_menu.submenus)
+    submenus_count = len(submenus)
     dishes_count = sum([len(submenu.dishes) for submenu in submenus])
     response_model = MenuWithCount(
         submenus_count=submenus_count,
@@ -51,7 +63,6 @@ def get_menu(
         **detailed_menu.dict()
     )
     return response_model
-
 
 
 @router.patch(

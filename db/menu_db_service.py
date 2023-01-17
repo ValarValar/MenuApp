@@ -2,13 +2,13 @@ from functools import lru_cache
 from typing import Optional
 
 from fastapi import Depends
-from sqlalchemy import func
+from sqlalchemy.orm import joinedload
 from sqlmodel import Session, select
 
 from api.v1.schemas.menus import MenuBase, MenuUpdate
 from db.db import get_session
 from db.mixin import ServiceMixin
-from models import Submenu, Dish
+from models import Submenu
 from models.menu import Menu
 
 
@@ -21,7 +21,7 @@ class MenuDbService(ServiceMixin):
         return new_menu
 
     def list_menu(self) -> list[Menu]:
-        results = self.session.exec(select(Menu)).all()
+        results = self.session.exec(select(Menu).options(joinedload(Menu.submenus).joinedload(Submenu.dishes))).unique().all()
         for item in results:
             print(item)
         return results
@@ -30,20 +30,12 @@ class MenuDbService(ServiceMixin):
         menu = self.session.get(Menu, id)
         return menu
 
-    def get_menu_by_id_with_counts(self, id: str):
-        """
-        not finished
-        :param id:
-        :return:
-        """
-        statement = select(Menu).where(Menu.id == id).join(Menu, Submenu).join(Dish)
-        results = self.session.exec(statement).all()
-        dishes_count = len(results)
-
-        statement = select(Menu).\
-            where(Menu.id == id).\
-            select(Menu.id, func.count(Menu.submenus)).group_by(Menu.id)
-
+    def get_menu_by_id_with_counts(self, id: str) -> Optional[Menu]:
+        statement = select(Menu)\
+            .where(Menu.id == id)\
+            .options(joinedload(Menu.submenus).joinedload(Submenu.dishes))
+        results = self.session.exec(statement).first()
+        return results
 
     def update_menu(self, id: str, update_menu: MenuUpdate) -> Optional[Menu]:
         current_menu = self.get_menu_by_id(id)

@@ -19,20 +19,19 @@ class DishDbService(ServiceMixin):
         return new_dish
 
     def list_dishes(self, menu_id: str, submenu_id: str) -> list[Dish]:
-        statement = select(Dish).join(Submenu)\
-            .where(Dish.submenu_id == submenu_id)\
+        statement = select(Dish).join(Submenu) \
+            .where(Dish.submenu_id == submenu_id) \
             .where(Submenu.menu_id == menu_id)
         results = self.session.exec(statement).all()
         return results
 
     def get_dish_by_ids(self, menu_id: str, submenu_id: str, dish_id: str) -> Optional[Dish]:
         statement = select(Dish).join(Submenu) \
-            .where(Dish.submenu_id == submenu_id)\
+            .where(Dish.submenu_id == submenu_id) \
             .where(Submenu.menu_id == menu_id) \
             .where(Dish.id == dish_id)
         results = self.session.exec(statement).first()
         return results
-
 
     def update_dish(self, menu_id: str, submenu_id: str, dish_id: str, update_submenu: DishUpdate) -> Optional[Dish]:
         current_dish = self.get_dish_by_ids(menu_id, submenu_id, dish_id)

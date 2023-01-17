@@ -3,8 +3,8 @@ import uuid as uuid_pkg
 from pydantic import condecimal
 from sqlmodel import Field, Relationship
 
-from models.uuid import UUIDModel
 from models.submenu import Submenu
+from models.uuid import UUIDModel
 
 
 class Dish(UUIDModel, table=True):
