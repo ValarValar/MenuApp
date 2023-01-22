@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     POSTGRES_HOST: str
     POSTGRES_PORT: int
     POSTGRES_URL: str
+    POSTGRES_TEST_URL: str
 
     class Config:
         env_file = find_dotenv(filename=".env.dev", usecwd=True)

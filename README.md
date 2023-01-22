@@ -1,14 +1,21 @@
 # MenuApp
 ## Stack
 - Fastapi
+- Sqlmodel(Sqlalchemy)
 - Postgresql
 - Docker
+- Pytest
 ## Project Setup     
-reminder: don't forger to configure your interpreter and activate venv.   
+__reminder__: don't forger to configure your interpreter and activate venv.   
 - activate venv    
 - pip install docker    
 - docker compose --env-file .env.dev up -d --build
-- docker-compose exec menu_app alembic upgrade head   
 ## Task summary    
-FastAPI app with PostgresSQL as db.
-todo: finish documentation
+FastAPI app with PostgresSQL as db.    
+At this moment implemented:     
+- 3 models (menu, submenu, dishes) and their ralations     
+- CRUD endpoints for them     
+- Pytest CRUD tests.     
+Tests are in a separate container, running by docker-compose command    
+
+
