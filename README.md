@@ -9,7 +9,7 @@
 __reminder__: don't forger to configure your interpreter and activate venv.   
 - activate venv    
 - pip install docker    
-- docker compose --env-file .env.dev up -d --build
+- docker compose -f docker-compose.yml -f docker-compose.tests.yml --env-file .env.dev up -d --build
 ## Task summary    
 FastAPI app with PostgresSQL as db.    
 At this moment implemented:     

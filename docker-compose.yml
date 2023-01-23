@@ -17,20 +17,6 @@ services:
       menu_postgres_db:
         condition: service_healthy
 
-  test_menu_app:
-    container_name: test_menu_app
-    build:
-      context: .
-      dockerfile: DockerfileTest
-    env_file:
-      - .env.dev
-    command: "pytest -vv"
-    networks:
-      - menu_network
-    depends_on:
-      menu_postgres_db:
-        condition: service_healthy
-
   menu_postgres_db:
     container_name: menu_postgres_db
     image: postgres:15.1-alpine
