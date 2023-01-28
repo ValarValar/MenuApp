@@ -90,7 +90,7 @@ class TestSubmenu:
 
         response = test_client.delete(url)
         expected_answer = {
-            "ok": True
+            "deleted": True
         }
         assert response.status_code == 200
         assert expected_answer == response.json()

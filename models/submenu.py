@@ -12,4 +12,7 @@ class Submenu(UUIDModel, table=True):
     description: str
     menu_id: uuid_pkg.UUID = Field(foreign_key="menu.id")
     menu: Menu = Relationship(back_populates="submenus")
-    dishes: Optional[List["Dish"]] = Relationship(back_populates="submenu")
+    dishes: Optional[List["Dish"]] = Relationship(
+        back_populates="submenu",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )

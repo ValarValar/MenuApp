@@ -18,34 +18,21 @@ def create_dish(
         submenu_id: str,
         dish: DishBase,
         dish_db: DishDbService = Depends(get_dish_db_service),
-        submenu_db: SubmenuDbService = Depends(get_submenu_db_service),
 ):
-    submenu = submenu_db.get_submenu_by_ids(menu_id, submenu_id)
-    if not submenu:
-        raise HTTPException(status_code=404, detail="submenu not found")
-
-    created_dish = dish_db.create_dish(dish, submenu_id).dict()
-    return DishCreate(**created_dish)
+    return dish_db.create_dish(dish, menu_id, submenu_id)
 
 
 @router.get(
     path="/",
-    summary="List dishs",
+    summary="List dishes",
     response_model=list[DishBase],
 )
 def list_dish(
         menu_id: str,
         submenu_id: str,
         dish_db: DishDbService = Depends(get_dish_db_service),
-        submenu_db: SubmenuDbService = Depends(get_submenu_db_service),
 ):
-    # Для прохождение теста закомментировано, но по логике если обращаемся к несуществующему меню, должна быть ошибка
-    # submenu = submenu_db.get_submenu_by_ids(menu_id, submenu_id)
-    # if not submenu:
-    # raise HTTPException(status_code=404, detail="submenu not found")
-
-    dishes = dish_db.list_dishes(menu_id, submenu_id)
-    return [DishBase(**dish.dict()) for dish in dishes]
+    return dish_db.list_dishes(menu_id, submenu_id)
 
 
 @router.get(
@@ -59,12 +46,7 @@ def get_dish(
         dish_id: str,
         dish_db: DishDbService = Depends(get_dish_db_service),
 ):
-    detailed_dish = dish_db.get_dish_by_ids(menu_id, submenu_id, dish_id)
-
-    if not detailed_dish:
-        raise HTTPException(status_code=404, detail="dish not found")
-
-    return DishCreate(**detailed_dish.dict())
+    return dish_db.get_dish_by_ids(menu_id, submenu_id, dish_id)
 
 
 @router.patch(
@@ -79,10 +61,7 @@ def update_dish(
         new_dish: DishUpdate,
         dish_db: DishDbService = Depends(get_dish_db_service)
 ):
-    updated_dish = dish_db.update_dish(menu_id, submenu_id, dish_id, new_dish)
-    if not updated_dish:
-        raise HTTPException(status_code=404, detail="dish not found")
-    return DishCreate(**updated_dish.dict())
+    return dish_db.update_dish(menu_id, submenu_id, dish_id, new_dish)
 
 
 @router.delete(

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
 from api.v1.schemas.menus import MenuCreate, MenuBase, MenuUpdate, MenuWithCount
 from db.menu_db_service import get_menu_db_service, MenuDbService
@@ -14,8 +14,7 @@ router = APIRouter()
     status_code=201
 )
 def create_menu(menu: MenuBase, menu_db: MenuDbService = Depends(get_menu_db_service)):
-    created_menu = menu_db.create_menu(menu).dict()
-    return MenuCreate(**created_menu)
+    return menu_db.create_menu(menu)
 
 
 @router.get(
@@ -25,19 +24,7 @@ def create_menu(menu: MenuBase, menu_db: MenuDbService = Depends(get_menu_db_ser
     response_model=list[MenuWithCount],
 )
 def list_menu(menu_db: MenuDbService = Depends(get_menu_db_service)):
-    menus = menu_db.list_menu()
-    response = []
-    for menu in menus:
-        submenus = menu.submenus
-        submenus_count = len(submenus)
-        dishes_count = sum([len(submenu.dishes) for submenu in submenus])
-        response_model = MenuWithCount(
-            submenus_count=submenus_count,
-            dishes_count=dishes_count,
-            **menu.dict()
-        )
-        response.append(response_model)
-    return response
+    return menu_db.list_menu()
 
 
 @router.get(
@@ -50,19 +37,7 @@ def get_menu(
         menu_id: str,
         menu_db: MenuDbService = Depends(get_menu_db_service)
 ):
-    detailed_menu = menu_db.get_menu_by_id_with_counts(menu_id)
-    if not detailed_menu:
-        raise HTTPException(status_code=404, detail="menu not found")
-
-    submenus = detailed_menu.submenus
-    submenus_count = len(submenus)
-    dishes_count = sum([len(submenu.dishes) for submenu in submenus])
-    response_model = MenuWithCount(
-        submenus_count=submenus_count,
-        dishes_count=dishes_count,
-        **detailed_menu.dict()
-    )
-    return response_model
+    return menu_db.get_menu_by_id_with_counts(menu_id)
 
 
 @router.patch(
@@ -76,10 +51,7 @@ def update_menu(
         new_menu: MenuUpdate,
         menu_db: MenuDbService = Depends(get_menu_db_service)
 ):
-    updated_menu = menu_db.update_menu(menu_id, new_menu)
-    if not updated_menu:
-        raise HTTPException(status_code=404, detail="menu not found")
-    return MenuCreate(**updated_menu.dict())
+    return menu_db.update_menu(menu_id, new_menu)
 
 
 @router.delete(
@@ -91,7 +63,4 @@ def delete_menu(
         menu_id: str,
         menu_db: MenuDbService = Depends(get_menu_db_service)
 ):
-    deleted_menu = menu_db.delete_menu(menu_id)
-    if not deleted_menu:
-        raise HTTPException(status_code=404, detail="menu not found")
-    return {"ok": deleted_menu}
+    return menu_db.delete_menu(menu_id)
