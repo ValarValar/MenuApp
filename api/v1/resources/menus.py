@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from api.v1.schemas.menus import MenuCreate, MenuBase, MenuUpdate, MenuWithCount
-from db.menu_db_service import get_menu_db_service, MenuDbService
+from db.menu_service import get_menu_service, MenuService
 
 router = APIRouter()
 
@@ -13,8 +13,8 @@ router = APIRouter()
     response_model=MenuCreate,
     status_code=201
 )
-def create_menu(menu: MenuBase, menu_db: MenuDbService = Depends(get_menu_db_service)):
-    return menu_db.create_menu(menu)
+def create_menu(menu: MenuBase, menu_service: MenuService = Depends(get_menu_service)):
+    return menu_service.create(menu)
 
 
 @router.get(
@@ -23,8 +23,8 @@ def create_menu(menu: MenuBase, menu_db: MenuDbService = Depends(get_menu_db_ser
     tags=["menus"],
     response_model=list[MenuWithCount],
 )
-def list_menu(menu_db: MenuDbService = Depends(get_menu_db_service)):
-    return menu_db.list_menu()
+def list_menu(menu_service: MenuService = Depends(get_menu_service)):
+    return menu_service.list()
 
 
 @router.get(
@@ -35,9 +35,9 @@ def list_menu(menu_db: MenuDbService = Depends(get_menu_db_service)):
 )
 def get_menu(
         menu_id: str,
-        menu_db: MenuDbService = Depends(get_menu_db_service)
+        menu_service: MenuService = Depends(get_menu_service)
 ):
-    return menu_db.get_menu_by_id_with_counts(menu_id)
+    return menu_service.get(menu_id)
 
 
 @router.patch(
@@ -49,9 +49,9 @@ def get_menu(
 def update_menu(
         menu_id: str,
         new_menu: MenuUpdate,
-        menu_db: MenuDbService = Depends(get_menu_db_service)
+        menu_service: MenuService = Depends(get_menu_service)
 ):
-    return menu_db.update_menu(menu_id, new_menu)
+    return menu_service.update(menu_id, new_menu)
 
 
 @router.delete(
@@ -61,6 +61,6 @@ def update_menu(
 )
 def delete_menu(
         menu_id: str,
-        menu_db: MenuDbService = Depends(get_menu_db_service)
+        menu_service: MenuService = Depends(get_menu_service)
 ):
-    return menu_db.delete_menu(menu_id)
+    return menu_service.delete(menu_id)

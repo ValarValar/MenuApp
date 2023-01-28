@@ -15,10 +15,10 @@ class SqlModelUnitOfWork:
     def __enter__(self, *args):
         return self
 
-    def __exit__(self):
+    def __exit__(self, *args):
         try:
             self.session.commit()
-        except:
+        except Exception:
             self.session.rollback()
         finally:
             self.session.close()

@@ -1,8 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
 from api.v1.schemas.submenus import SubmenuCreate, SubmenuUpdate, SubmenuBase, SubmenuWithCount
-from db.menu_db_service import MenuDbService, get_menu_db_service
-from db.submenu_db_service import SubmenuDbService, get_submenu_db_service
+from db.submenu_service import SubmenuService, get_submenu_service
 
 router = APIRouter()
 
@@ -17,9 +16,9 @@ router = APIRouter()
 def create_submenu(
         menu_id: str,
         submenu: SubmenuBase,
-        submenu_db: SubmenuDbService = Depends(get_submenu_db_service),
+        submenu_service: SubmenuService = Depends(get_submenu_service),
 ):
-    return submenu_db.create_submenu(submenu, menu_id)
+    return submenu_service.create(submenu, menu_id)
 
 
 @router.get(
@@ -30,9 +29,9 @@ def create_submenu(
 )
 def list_submenu(
         menu_id: str,
-        submenu_db: SubmenuDbService = Depends(get_submenu_db_service)
+        submenu_service: SubmenuService = Depends(get_submenu_service)
 ):
-    return submenu_db.list_submenus(menu_id)
+    return submenu_service.list(menu_id)
 
 
 @router.get(
@@ -44,9 +43,9 @@ def list_submenu(
 def get_submenu(
         menu_id: str,
         submenu_id: str,
-        submenu_db: SubmenuDbService = Depends(get_submenu_db_service),
+        submenu_service: SubmenuService = Depends(get_submenu_service),
 ):
-    return submenu_db.get_submenu_by_ids(menu_id, submenu_id)
+    return submenu_service.get(menu_id, submenu_id)
 
 
 @router.patch(
@@ -59,9 +58,9 @@ def update_submenu(
         menu_id: str,
         submenu_id: str,
         new_submenu: SubmenuUpdate,
-        submenu_db: SubmenuDbService = Depends(get_submenu_db_service)
+        submenu_service: SubmenuService = Depends(get_submenu_service)
 ):
-    return submenu_db.update_submenu(menu_id, submenu_id, new_submenu)
+    return submenu_service.update(menu_id, submenu_id, new_submenu)
 
 
 @router.delete(
@@ -72,6 +71,6 @@ def update_submenu(
 def delete_submenu(
         menu_id: str,
         submenu_id: str,
-        submenu_db: SubmenuDbService = Depends(get_submenu_db_service)
+        submenu_service: SubmenuService = Depends(get_submenu_service)
 ):
-    return submenu_db.delete_submenu(menu_id, submenu_id)
+    return submenu_service.delete(menu_id, submenu_id)

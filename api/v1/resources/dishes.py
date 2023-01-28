@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 
 from api.v1.schemas.dishes import DishCreate, DishUpdate, DishBase
-from db.dish_db_service import DishDbService, get_dish_db_service
-from db.submenu_db_service import SubmenuDbService, get_submenu_db_service
+from db.dish_service import DishService, get_dish_service
 
 router = APIRouter()
 
@@ -17,9 +16,9 @@ def create_dish(
         menu_id: str,
         submenu_id: str,
         dish: DishBase,
-        dish_db: DishDbService = Depends(get_dish_db_service),
+        dish_service: DishService = Depends(get_dish_service),
 ):
-    return dish_db.create_dish(dish, menu_id, submenu_id)
+    return dish_service.create(dish, menu_id, submenu_id)
 
 
 @router.get(
@@ -30,9 +29,9 @@ def create_dish(
 def list_dish(
         menu_id: str,
         submenu_id: str,
-        dish_db: DishDbService = Depends(get_dish_db_service),
+        dish_service: DishService = Depends(get_dish_service),
 ):
-    return dish_db.list_dishes(menu_id, submenu_id)
+    return dish_service.list(menu_id, submenu_id)
 
 
 @router.get(
@@ -44,9 +43,9 @@ def get_dish(
         menu_id: str,
         submenu_id: str,
         dish_id: str,
-        dish_db: DishDbService = Depends(get_dish_db_service),
+        dish_service: DishService = Depends(get_dish_service),
 ):
-    return dish_db.get_dish_by_ids(menu_id, submenu_id, dish_id)
+    return dish_service.get(menu_id, submenu_id, dish_id)
 
 
 @router.patch(
@@ -59,9 +58,9 @@ def update_dish(
         submenu_id: str,
         dish_id: str,
         new_dish: DishUpdate,
-        dish_db: DishDbService = Depends(get_dish_db_service)
+        dish_service: DishService = Depends(get_dish_service)
 ):
-    return dish_db.update_dish(menu_id, submenu_id, dish_id, new_dish)
+    return dish_service.update(menu_id, submenu_id, dish_id, new_dish)
 
 
 @router.delete(
@@ -72,10 +71,7 @@ def delete_dish(
         menu_id: str,
         submenu_id: str,
         dish_id: str,
-        dish_db: DishDbService = Depends(get_dish_db_service)
+        dish_service: DishService = Depends(get_dish_service)
 ):
-    deleted_dish = dish_db.delete_dish(menu_id, submenu_id, dish_id)
-    if not deleted_dish:
-        raise HTTPException(status_code=404, detail="dish not found")
+    return dish_service.delete(menu_id, submenu_id, dish_id)
 
-    return {"ok": deleted_dish}
