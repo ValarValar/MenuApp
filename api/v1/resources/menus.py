@@ -24,7 +24,7 @@ def create_menu(menu: MenuBase, menu_service: MenuService = Depends(get_menu_ser
     response_model=MenuList
 )
 def list_menu(menu_service: MenuService = Depends(get_menu_service)):
-    return menu_service.list()
+    return menu_service.get_list()
 
 
 @router.get(
@@ -37,7 +37,7 @@ def get_menu(
         menu_id: str,
         menu_service: MenuService = Depends(get_menu_service)
 ):
-    return menu_service.get(menu_id)
+    return menu_service.get_detail(menu_id)
 
 
 @router.patch(

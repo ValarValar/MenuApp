@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     POSTGRES_URL: str
     POSTGRES_TEST_URL: str
     REDIS_CACHE_EXPIRE_IN_SECONDS: int
+    REDIS_HOST: str
+    REDIS_PORT: int
 
     class Config:
         env_file = find_dotenv(filename=".env.dev", usecwd=True)

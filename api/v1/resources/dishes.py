@@ -31,7 +31,7 @@ def list_dish(
         submenu_id: str,
         dish_service: DishService = Depends(get_dish_service),
 ):
-    return dish_service.list(menu_id, submenu_id)
+    return dish_service.get_list(menu_id, submenu_id)
 
 
 @router.get(
@@ -45,7 +45,7 @@ def get_dish(
         dish_id: str,
         dish_service: DishService = Depends(get_dish_service),
 ):
-    return dish_service.get(menu_id, submenu_id, dish_id)
+    return dish_service.get_detail(menu_id, submenu_id, dish_id)
 
 
 @router.patch(

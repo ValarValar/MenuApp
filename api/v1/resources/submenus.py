@@ -37,7 +37,7 @@ def list_submenu(
         menu_id: str,
         submenu_service: SubmenuService = Depends(get_submenu_service)
 ):
-    return submenu_service.list(menu_id)
+    return submenu_service.get_list(menu_id)
 
 
 @router.get(
@@ -51,7 +51,7 @@ def get_submenu(
         submenu_id: str,
         submenu_service: SubmenuService = Depends(get_submenu_service),
 ):
-    return submenu_service.get(menu_id, submenu_id)
+    return submenu_service.get_detail(menu_id, submenu_id)
 
 
 @router.patch(

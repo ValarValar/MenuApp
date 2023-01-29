@@ -25,7 +25,7 @@ services:
     expose:
       - 6379
     ports:
-      - "9000:6379"
+      - "6379:6379"
     networks:
       - menu_network
     healthcheck:

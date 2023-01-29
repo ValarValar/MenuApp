@@ -25,6 +25,10 @@ class AbstractCache(ABC):
         pass
 
     @abstractmethod
+    def delete(self, key: str):
+        self.cache.delete(key)
+
+    @abstractmethod
     def close(self):
         pass
 
