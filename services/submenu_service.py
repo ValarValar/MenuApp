@@ -13,7 +13,7 @@ from api.v1.schemas.submenus import (
 )
 from db.cache.base import AbstractCache, get_cache
 from db.db import get_session
-from db.mixin import ServiceMixin
+from services.mixin import ServiceMixin
 from db.uow import SqlModelUnitOfWork
 
 
@@ -35,7 +35,7 @@ class SubmenuService(ServiceMixin):
         self.menu_exists(menu_id)
         with self.uow:
             new_submenu = self.uow.submenu_repo.create(submenu, menu_id)
-            response = SubmenuCreate(**new_submenu)
+            response = SubmenuCreate(**new_submenu.dict())
         return response
 
     def list(self, menu_id: str) -> list[SubmenuList]:
@@ -59,7 +59,7 @@ class SubmenuService(ServiceMixin):
             submenu = self.uow.submenu_repo.update(menu_id, submenu_id, update_submenu)
             if not submenu:
                 raise HTTPException(status_code=404, detail="submenu not found")
-            response = SubmenuCreate(**submenu)
+            response = SubmenuCreate(**submenu.dict())
         return response
 
     def delete(self, menu_id: str, submenu_id: str) -> dict:

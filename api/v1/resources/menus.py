@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from api.v1.schemas.menus import MenuCreate, MenuBase, MenuUpdate, MenuList, MenuDetail
-from db.menu_service import get_menu_service, MenuService
+from services.menu_service import get_menu_service, MenuService
 
 router = APIRouter()
 

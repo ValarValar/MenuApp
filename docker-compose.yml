@@ -16,6 +16,23 @@ services:
     depends_on:
       menu_postgres_db:
         condition: service_healthy
+      menu_redis:
+        condition: service_healthy
+
+  menu_redis:
+    container_name: menu_redis
+    image: redis:latest
+    expose:
+      - 6379
+    ports:
+      - "9000:6379"
+    networks:
+      - menu_network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 20s
+      retries: 100
 
   menu_postgres_db:
     container_name: menu_postgres_db

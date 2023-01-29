@@ -7,7 +7,7 @@ from sqlmodel import Session
 from api.v1.schemas.dishes import DishBase, DishUpdate, DishCreate, DishList
 from db.cache.base import AbstractCache, get_cache
 from db.db import get_session
-from db.mixin import ServiceMixin
+from services.mixin import ServiceMixin
 from db.uow import SqlModelUnitOfWork
 
 
@@ -31,7 +31,7 @@ class DishService(ServiceMixin):
         self.submenu_exists(menu_id, submenu_id)
         with self.uow:
             new_dish = self.uow.dish_repo.create(dish, submenu_id)
-            response = DishCreate(**new_dish)
+            response = DishCreate(**new_dish.dict())
         return response
 
     def list(self, menu_id: str, submenu_id: str) -> DishList:
@@ -47,7 +47,7 @@ class DishService(ServiceMixin):
             dish = self.uow.dish_repo.get(menu_id, submenu_id, dish_id)
             if not dish:
                 raise HTTPException(status_code=404, detail="dish not found")
-            response = DishCreate(**dish)
+            response = DishCreate(**dish.dict())
         return response
 
     def update(
@@ -61,7 +61,7 @@ class DishService(ServiceMixin):
             dish = self.uow.dish_repo.update(menu_id, submenu_id, dish_id, update_submenu)
             if not dish:
                 raise HTTPException(status_code=404, detail="dish not found")
-            response = DishCreate(**dish)
+            response = DishCreate(**dish.dict())
         return response
 
     def delete(self, menu_id: str, submenu_id: str, dish_id: str) -> dict:

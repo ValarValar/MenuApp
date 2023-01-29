@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from api.v1.schemas.dishes import DishCreate, DishUpdate, DishBase, DishList
-from db.dish_service import DishService, get_dish_service
+from services.dish_service import DishService, get_dish_service
 
 router = APIRouter()
 

@@ -20,3 +20,5 @@ class CacheRedis(AbstractCache):
 
     def close(self) -> NoReturn:
         self.cache.close()
+
+

@@ -7,7 +7,7 @@ from api.v1.schemas.submenus import (
     SubmenuList,
     SubmenuDetail
 )
-from db.submenu_service import SubmenuService, get_submenu_service
+from services.submenu_service import SubmenuService, get_submenu_service
 
 router = APIRouter()
 

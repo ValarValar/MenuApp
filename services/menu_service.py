@@ -4,10 +4,10 @@ from typing import Optional
 from fastapi import Depends, HTTPException
 from sqlmodel import Session
 
-from api.v1.schemas.menus import MenuBase, MenuUpdate, MenuWithCount, MenuCreate, MenuDetail, MenuList
+from api.v1.schemas.menus import MenuBase, MenuUpdate, MenuCreate, MenuDetail, MenuList
 from db.cache.base import AbstractCache, get_cache
 from db.db import get_session
-from db.mixin import ServiceMixin
+from services.mixin import ServiceMixin
 from db.uow import SqlModelUnitOfWork
 
 
@@ -20,33 +20,16 @@ class MenuService(ServiceMixin):
 
     def list(self) -> MenuList:
         with self.uow:
-            results = self.uow.menu_repo.list()
-            response = []
-            for menu in results:
-                submenus = menu.submenus
-                submenus_count = len(submenus)
-                dishes_count = sum([len(submenu.dishes) for submenu in submenus])
-                response_model = MenuWithCount(
-                    submenus_count=submenus_count,
-                    dishes_count=dishes_count,
-                    **menu.dict()
-                )
-                response.append(response_model)
+            menus = self.uow.menu_repo.list()
+            response = MenuList.parse_obj(menus)
         return response
 
     def get(self, id: str) -> Optional[MenuDetail]:
         with self.uow:
-            results = self.uow.menu_repo.get_by_id_with_counts(id)
-            if not results:
+            menu = self.uow.menu_repo.get_by_id_with_counts(id)
+            if not menu:
                 raise HTTPException(status_code=404, detail="menu not found")
-            submenus = results.submenus
-            submenus_count = len(submenus)
-            dishes_count = sum([len(submenu.dishes) for submenu in submenus])
-            response = MenuWithCount(
-                submenus_count=submenus_count,
-                dishes_count=dishes_count,
-                **results.dict()
-            )
+            response = MenuDetail.parse_obj(menu)
         return response
 
     def update(self, id: str, update_menu: MenuUpdate) -> MenuCreate:

@@ -1,7 +1,8 @@
 from typing import Optional
 
+from sqlalchemy import func, text, select, Integer
 from sqlalchemy.orm import joinedload
-from sqlmodel import select
+from sqlalchemy.sql.functions import coalesce
 
 from api.v1.schemas.menus import MenuBase, MenuUpdate
 from db.repositories.base import AbstractRepository
@@ -15,9 +16,25 @@ class MenuRepository(AbstractRepository):
         return new_menu
 
     def list(self) -> list[Menu]:
-        results = self.session.exec(select(Menu).options(
-            joinedload(Menu.submenus).joinedload(Submenu.dishes))
-        ).unique().all()
+        subquery = select(
+            Submenu.id,
+            Submenu.description,
+            Submenu.title,
+            Submenu.menu_id,
+            func.count(Submenu.dishes).label("dishes_count")
+        ).join(
+            Submenu.dishes, isouter=True
+        ).group_by(Submenu.id).subquery()
+        statement = select(
+            Menu.id,
+            Menu.description,
+            Menu.title,
+            func.count(subquery.c.id).label("submenus_count"),
+            func.coalesce(func.sum(subquery.c.dishes_count), 0).label("dishes_count")
+        ).outerjoin(
+            subquery, Menu.id == subquery.c.menu_id
+        ).group_by(Menu.id)
+        results = self.session.exec(statement).all()
         return results
 
     def get_by_id(self, id: str) -> Optional[Menu]:
@@ -25,9 +42,28 @@ class MenuRepository(AbstractRepository):
         return menu
 
     def get_by_id_with_counts(self, id: str) -> Optional[Menu]:
-        statement = select(Menu).where(Menu.id == id).options(
-            joinedload(Menu.submenus).joinedload(Submenu.dishes)
-        )
+        subquery = select(
+            Submenu.id,
+            Submenu.description,
+            Submenu.title,
+            Submenu.menu_id,
+            func.count(Submenu.dishes).label("dishes_count")
+        ).where(
+            Submenu.menu_id == id
+        ).join(
+            Submenu.dishes, isouter=True
+        ).group_by(Submenu.id).subquery()
+        statement = select(
+            Menu.id,
+            Menu.description,
+            Menu.title,
+            func.count(subquery.c.id).label("submenus_count"),
+            func.coalesce(func.sum(subquery.c.dishes_count), 0).label("dishes_count")
+        ).where(
+            Menu.id == id
+        ).outerjoin(
+            subquery, Menu.id == subquery.c.menu_id
+        ).group_by(Menu.id)
         results = self.session.exec(statement).one_or_none()
         return results
 

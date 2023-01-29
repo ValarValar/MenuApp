@@ -26,7 +26,7 @@ class SubmenuRepository(AbstractRepository):
         ).join(
             Submenu.dishes, isouter=True
         ).group_by(Submenu.id)
-        results = self.session.exec(statement).all()
+        results = self.session.execute(statement=statement).all()
         return results
 
     def get_by_ids(self, menu_id: str, submenu_id: str) -> Optional[Submenu]:
