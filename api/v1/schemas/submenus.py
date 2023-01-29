@@ -13,8 +13,12 @@ class SubmenuCreate(SubmenuBase):
     id: UUID
 
 
-class SubmenuWithCount(SubmenuCreate):
+class SubmenuDetail(SubmenuCreate):
     dishes_count: int
+
+
+class SubmenuList(BaseModel):
+    __root__: list[SubmenuDetail]
 
 
 class SubmenuUpdate(BaseModel):

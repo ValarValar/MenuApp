@@ -30,7 +30,7 @@ class DishRepository(AbstractRepository):
         ).where(
             Dish.id == dish_id
         )
-        detailed_dish = self.session.exec(statement).first()
+        detailed_dish = self.session.exec(statement).one_or_none()
         return detailed_dish
 
     def update(

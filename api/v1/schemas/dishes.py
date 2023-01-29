@@ -10,6 +10,10 @@ class DishBase(BaseModel):
     price: str
 
 
+class DishList(BaseModel):
+    __root__: list[DishBase]
+
+
 class DishCreate(DishBase):
     id: UUID
 

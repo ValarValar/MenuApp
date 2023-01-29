@@ -2,15 +2,19 @@ from functools import lru_cache
 from typing import Optional
 
 from fastapi import Depends, HTTPException
-from sqlalchemy.orm import joinedload
-from sqlmodel import Session, select
+from sqlmodel import Session
 
-from api.v1.schemas.submenus import SubmenuBase, SubmenuUpdate, SubmenuCreate, SubmenuWithCount
+from api.v1.schemas.submenus import (
+    SubmenuBase,
+    SubmenuUpdate,
+    SubmenuCreate,
+    SubmenuList,
+    SubmenuDetail
+)
 from db.cache.base import AbstractCache, get_cache
 from db.db import get_session
 from db.mixin import ServiceMixin
 from db.uow import SqlModelUnitOfWork
-from models import Submenu
 
 
 class SubmenuService(ServiceMixin):
@@ -31,26 +35,23 @@ class SubmenuService(ServiceMixin):
         self.menu_exists(menu_id)
         with self.uow:
             new_submenu = self.uow.submenu_repo.create(submenu, menu_id)
-            response = SubmenuCreate(**new_submenu.dict())
+            response = SubmenuCreate(**new_submenu)
         return response
 
-    def list(self, menu_id: str) -> list[SubmenuWithCount]:
+    def list(self, menu_id: str) -> list[SubmenuList]:
         self.menu_exists(menu_id)
         with self.uow:
             submenus = self.uow.submenu_repo.list(menu_id)
-            response = []
-            for submenu in submenus:
-                dishes_count = len(submenu.dishes)
-                response.append(SubmenuWithCount(dishes_count=dishes_count, **submenu.dict()))
+            response = SubmenuList.parse_obj(submenus)
+
         return response
 
-    def get(self, menu_id: str, submenu_id: str) -> Optional[SubmenuWithCount]:
+    def get(self, menu_id: str, submenu_id: str) -> Optional[SubmenuDetail]:
         with self.uow:
-            submenu = self.uow.submenu_repo.get_by_ids(menu_id, submenu_id)
+            submenu = self.uow.submenu_repo.get_by_ids_with_count(menu_id, submenu_id)
             if not submenu:
                 raise HTTPException(status_code=404, detail="submenu not found")
-            dishes_count = len(submenu.dishes)
-            response = SubmenuWithCount(dishes_count=dishes_count, **submenu.dict())
+            response = SubmenuDetail(**submenu)
         return response
 
     def update(self, menu_id: str, submenu_id: str, update_submenu: SubmenuUpdate) -> SubmenuCreate:
@@ -58,7 +59,7 @@ class SubmenuService(ServiceMixin):
             submenu = self.uow.submenu_repo.update(menu_id, submenu_id, update_submenu)
             if not submenu:
                 raise HTTPException(status_code=404, detail="submenu not found")
-            response = SubmenuCreate(**submenu.dict())
+            response = SubmenuCreate(**submenu)
         return response
 
     def delete(self, menu_id: str, submenu_id: str) -> dict:

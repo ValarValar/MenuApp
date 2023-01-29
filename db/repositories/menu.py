@@ -28,7 +28,7 @@ class MenuRepository(AbstractRepository):
         statement = select(Menu).where(Menu.id == id).options(
             joinedload(Menu.submenus).joinedload(Submenu.dishes)
         )
-        results = self.session.exec(statement).first()
+        results = self.session.exec(statement).one_or_none()
         return results
 
     def update(self, id: str, update_menu: MenuUpdate) -> Menu:

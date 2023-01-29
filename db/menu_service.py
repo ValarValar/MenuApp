@@ -4,12 +4,11 @@ from typing import Optional
 from fastapi import Depends, HTTPException
 from sqlmodel import Session
 
-from api.v1.schemas.menus import MenuBase, MenuUpdate, MenuWithCount, MenuCreate
+from api.v1.schemas.menus import MenuBase, MenuUpdate, MenuWithCount, MenuCreate, MenuDetail, MenuList
 from db.cache.base import AbstractCache, get_cache
 from db.db import get_session
 from db.mixin import ServiceMixin
 from db.uow import SqlModelUnitOfWork
-from models.menu import Menu
 
 
 class MenuService(ServiceMixin):
@@ -19,7 +18,7 @@ class MenuService(ServiceMixin):
             response = MenuCreate(**new_menu.dict())
         return response
 
-    def list(self) -> list[MenuWithCount]:
+    def list(self) -> MenuList:
         with self.uow:
             results = self.uow.menu_repo.list()
             response = []
@@ -35,7 +34,7 @@ class MenuService(ServiceMixin):
                 response.append(response_model)
         return response
 
-    def get(self, id: str) -> Optional[MenuWithCount]:
+    def get(self, id: str) -> Optional[MenuDetail]:
         with self.uow:
             results = self.uow.menu_repo.get_by_id_with_counts(id)
             if not results:

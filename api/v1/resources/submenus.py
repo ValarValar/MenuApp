@@ -1,6 +1,12 @@
 from fastapi import APIRouter, Depends
 
-from api.v1.schemas.submenus import SubmenuCreate, SubmenuUpdate, SubmenuBase, SubmenuWithCount
+from api.v1.schemas.submenus import (
+    SubmenuCreate,
+    SubmenuUpdate,
+    SubmenuBase,
+    SubmenuList,
+    SubmenuDetail
+)
 from db.submenu_service import SubmenuService, get_submenu_service
 
 router = APIRouter()
@@ -25,7 +31,7 @@ def create_submenu(
     path="/",
     summary="List submenus",
     tags=["submenus"],
-    response_model=list[SubmenuWithCount],
+    response_model=SubmenuList,
 )
 def list_submenu(
         menu_id: str,
@@ -38,7 +44,7 @@ def list_submenu(
     path="/{submenu_id}",
     summary="Detailed submenu",
     tags=["submenus"],
-    response_model=SubmenuWithCount
+    response_model=SubmenuDetail
 )
 def get_submenu(
         menu_id: str,

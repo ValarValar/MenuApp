@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
-from api.v1.schemas.dishes import DishCreate, DishUpdate, DishBase
+from api.v1.schemas.dishes import DishCreate, DishUpdate, DishBase, DishList
 from db.dish_service import DishService, get_dish_service
 
 router = APIRouter()
@@ -24,7 +24,7 @@ def create_dish(
 @router.get(
     path="/",
     summary="List dishes",
-    response_model=list[DishBase],
+    response_model=DishList,
 )
 def list_dish(
         menu_id: str,
@@ -74,4 +74,3 @@ def delete_dish(
         dish_service: DishService = Depends(get_dish_service)
 ):
     return dish_service.delete(menu_id, submenu_id, dish_id)
-

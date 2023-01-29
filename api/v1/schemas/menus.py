@@ -13,9 +13,13 @@ class MenuCreate(MenuBase):
     id: UUID
 
 
-class MenuWithCount(MenuCreate):
+class MenuDetail(MenuCreate):
     submenus_count: int
     dishes_count: int
+
+
+class MenuList(BaseModel):
+    __root__: list[MenuDetail]
 
 
 class MenuUpdate(BaseModel):
