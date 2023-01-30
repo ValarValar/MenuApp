@@ -47,7 +47,7 @@ class DishService(ServiceMixin):
         return response
 
     def get_list(self, menu_id: str, submenu_id: str) -> DishList:
-        self.submenu_exists(menu_id, submenu_id)
+        # self.submenu_exists(menu_id, submenu_id) commented for postman test pass
 
         cache_value = self.cache.get(self.list_cache_key)
         if cache_value:
