@@ -5,6 +5,8 @@
 - Postgresql
 - Docker
 - Pytest
+- Redis
+- pre-commit (linters)
 ## Project Setup
 __reminder__: don't forger to configure your interpreter and activate venv.
 - activate venv
@@ -16,4 +18,4 @@ At this moment implemented:
 - 3 models (menu, submenu, dishes) and their ralations
 - CRUD endpoints for them
 - Pytest CRUD tests.
-Tests are in a separate container, running by docker-compose command
+Tests are in a separate container, running by docker-compose command.
