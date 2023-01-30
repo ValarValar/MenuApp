@@ -2,17 +2,17 @@ from logging.config import fileConfig
 
 from alembic import context
 from dotenv import dotenv_values
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-from models import Menu, Submenu, Dish
+from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
+
+from models import Dish, Menu, Submenu
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
-env_config = dotenv_values(".env.dev")
-config.set_main_option("sqlalchemy.url", env_config["POSTGRES_URL"])
+env_config = dotenv_values('.env.dev')
+config.set_main_option('sqlalchemy.url', env_config['POSTGRES_URL'])
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -44,12 +44,12 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    url = config.get_main_option('sqlalchemy.url')
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
-        dialect_opts={"paramstyle": "named"},
+        dialect_opts={'paramstyle': 'named'},
     )
 
     with context.begin_transaction():
@@ -65,13 +65,13 @@ def run_migrations_online() -> None:
     """
     connectable = engine_from_config(
         config.get_section(config.config_ini_section),
-        prefix="sqlalchemy.",
+        prefix='sqlalchemy.',
         poolclass=pool.NullPool,
     )
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection, target_metadata=target_metadata,
         )
 
         with context.begin_transaction():

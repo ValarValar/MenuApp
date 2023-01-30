@@ -1,6 +1,6 @@
 from sqlmodel import Session, create_engine
 
-__all__ = ("get_session",)
+__all__ = ('get_session',)
 
 from core.config import get_settings
 

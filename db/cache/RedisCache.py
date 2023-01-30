@@ -1,12 +1,9 @@
-from typing import NoReturn, Optional, Union
+from typing import Optional, Union
 
-__all__ = ("CacheRedis",)
-
-import redis
 from fastapi import Depends
-from pydantic.main import BaseModel
+from redis import Redis
 
-from core.config import get_settings, Settings
+from core.config import Settings, get_settings
 from db.cache.base import AbstractCache
 
 
@@ -24,16 +21,16 @@ class CacheRedis(AbstractCache):
     def delete(self, key):
         self.cache.delete(key)
 
-    def close(self) -> NoReturn:
+    def close(self):
         self.cache.close()
 
 
 def get_redis_cache(settings: Settings = Depends(get_settings)):
     redis_cache = CacheRedis(
-        redis.Redis(
+        Redis(
             host=settings.REDIS_HOST,
             port=settings.REDIS_PORT,
             db=1, decode_responses=True,
-        )
+        ),
     )
     return redis_cache

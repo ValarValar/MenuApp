@@ -4,16 +4,16 @@ from typing import Optional
 from fastapi import Depends, HTTPException
 from sqlmodel import Session
 
-from api.v1.schemas.dishes import DishBase, DishUpdate, DishCreate, DishList
-from db.cache.RedisCache import get_redis_cache
+from api.v1.schemas.dishes import DishBase, DishCreate, DishList, DishUpdate
 from db.cache.base import AbstractCache
+from db.cache.RedisCache import get_redis_cache
 from db.db import get_session
 from db.uow import SqlModelUnitOfWork
 from services.mixin import ServiceMixin
 
 
 class DishService(ServiceMixin):
-    list_cache_key = "dish-list"
+    list_cache_key = 'dish-list'
 
     def clear_cache(self, menu_id: str = '', submenu_id: str = '', dish_id: str = ''):
         self.cache.delete(menu_id)
@@ -32,7 +32,9 @@ class DishService(ServiceMixin):
         with self.uow:
             submenu = self.uow.submenu_repo.get_by_ids(menu_id, submenu_id)
             if not submenu:
-                raise HTTPException(status_code=404, detail="submenu not found")
+                raise HTTPException(
+                    status_code=404, detail='submenu not found',
+                )
         return
 
     def create(self, dish: DishBase, menu_id: str, submenu_id: str) -> DishCreate:
@@ -66,7 +68,7 @@ class DishService(ServiceMixin):
         with self.uow:
             dish = self.uow.dish_repo.get(menu_id, submenu_id, dish_id)
             if not dish:
-                raise HTTPException(status_code=404, detail="dish not found")
+                raise HTTPException(status_code=404, detail='dish not found')
             response = DishCreate(**dish.dict())
 
         self.cache.set(dish_id, response.json())
@@ -77,12 +79,14 @@ class DishService(ServiceMixin):
             menu_id: str,
             submenu_id: str,
             dish_id: str,
-            update_submenu: DishUpdate
+            update_submenu: DishUpdate,
     ) -> Optional[DishCreate]:
         with self.uow:
-            dish = self.uow.dish_repo.update(menu_id, submenu_id, dish_id, update_submenu)
+            dish = self.uow.dish_repo.update(
+                menu_id, submenu_id, dish_id, update_submenu,
+            )
             if not dish:
-                raise HTTPException(status_code=404, detail="dish not found")
+                raise HTTPException(status_code=404, detail='dish not found')
             response = DishCreate(**dish.dict())
         self.clear_cache(menu_id, submenu_id, dish_id)
         return response
@@ -92,15 +96,15 @@ class DishService(ServiceMixin):
             deleted = self.uow.dish_repo.delete(menu_id, submenu_id, dish_id)
         self.clear_cache(menu_id, submenu_id, dish_id)
         if deleted:
-            return {"deleted": deleted}
+            return {'deleted': deleted}
         else:
-            raise HTTPException(status_code=404, detail="dish not found")
+            raise HTTPException(status_code=404, detail='dish not found')
 
 
 @lru_cache
 def get_dish_service(
         cache: AbstractCache = Depends(get_redis_cache),
-        session: Session = Depends(get_session)
+        session: Session = Depends(get_session),
 ) -> DishService:
     uow = SqlModelUnitOfWork(session)
     return DishService(cache=cache, uow=uow)

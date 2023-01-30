@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional
 
 from sqlmodel import Relationship
 
@@ -8,7 +8,7 @@ from models.uuid import UUIDModel
 class Menu(UUIDModel, table=True):
     title: str
     description: str
-    submenus: Optional[List["Submenu"]] = Relationship(
-        back_populates="menu",
-        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    submenus: Optional[list['Submenu']] = Relationship(
+        back_populates='menu',
+        sa_relationship_kwargs={'cascade': 'all, delete-orphan'},
     )

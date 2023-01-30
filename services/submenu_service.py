@@ -6,20 +6,20 @@ from sqlmodel import Session
 
 from api.v1.schemas.submenus import (
     SubmenuBase,
-    SubmenuUpdate,
     SubmenuCreate,
+    SubmenuDetail,
     SubmenuList,
-    SubmenuDetail
+    SubmenuUpdate,
 )
+from db.cache.base import AbstractCache
 from db.cache.RedisCache import get_redis_cache
-from db.cache.base import AbstractCache, get_cache
 from db.db import get_session
-from services.mixin import ServiceMixin
 from db.uow import SqlModelUnitOfWork
+from services.mixin import ServiceMixin
 
 
 class SubmenuService(ServiceMixin):
-    list_cache_key = "submenu-list"
+    list_cache_key = 'submenu-list'
 
     def clear_cache(self, menu_id: str = '', submenu_id: str = ''):
         self.cache.delete(menu_id)
@@ -36,7 +36,7 @@ class SubmenuService(ServiceMixin):
         with self.uow:
             menu = self.uow.menu_repo.get_by_id(menu_id)
             if not menu:
-                raise HTTPException(status_code=404, detail="menu not found")
+                raise HTTPException(status_code=404, detail='menu not found')
         return
 
     def create(self, submenu: SubmenuBase, menu_id: str) -> SubmenuCreate:
@@ -66,18 +66,26 @@ class SubmenuService(ServiceMixin):
             return SubmenuDetail.parse_raw(cache_value)
 
         with self.uow:
-            submenu = self.uow.submenu_repo.get_by_ids_with_count(menu_id, submenu_id)
+            submenu = self.uow.submenu_repo.get_by_ids_with_count(
+                menu_id, submenu_id,
+            )
             if not submenu:
-                raise HTTPException(status_code=404, detail="submenu not found")
+                raise HTTPException(
+                    status_code=404, detail='submenu not found',
+                )
             response = SubmenuDetail(**submenu)
         self.cache.set(submenu_id, response.json())
         return response
 
     def update(self, menu_id: str, submenu_id: str, update_submenu: SubmenuUpdate) -> SubmenuCreate:
         with self.uow:
-            submenu = self.uow.submenu_repo.update(menu_id, submenu_id, update_submenu)
+            submenu = self.uow.submenu_repo.update(
+                menu_id, submenu_id, update_submenu,
+            )
             if not submenu:
-                raise HTTPException(status_code=404, detail="submenu not found")
+                raise HTTPException(
+                    status_code=404, detail='submenu not found',
+                )
             response = SubmenuCreate(**submenu.dict())
         self.clear_cache(menu_id, submenu_id)
         return response
@@ -87,15 +95,15 @@ class SubmenuService(ServiceMixin):
             deleted = self.uow.submenu_repo.delete(menu_id, submenu_id)
         self.clear_cache(menu_id, submenu_id)
         if deleted:
-            return {"deleted": deleted}
+            return {'deleted': deleted}
         else:
-            raise HTTPException(status_code=404, detail="menu not found")
+            raise HTTPException(status_code=404, detail='menu not found')
 
 
 @lru_cache
 def get_submenu_service(
         cache: AbstractCache = Depends(get_redis_cache),
-        session: Session = Depends(get_session)
+        session: Session = Depends(get_session),
 ) -> SubmenuService:
     uow = SqlModelUnitOfWork(session)
     return SubmenuService(cache=cache, uow=uow)

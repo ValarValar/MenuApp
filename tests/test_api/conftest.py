@@ -1,6 +1,6 @@
 import pytest
-from sqlalchemy_utils import database_exists, create_database
-from sqlmodel import create_engine, SQLModel, Session
+from sqlalchemy_utils import create_database, database_exists
+from sqlmodel import Session, SQLModel, create_engine
 from starlette.testclient import TestClient
 
 from core.config import get_settings
@@ -20,7 +20,7 @@ def override_get_session():
         yield session
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope='class')
 def test_db():
     SQLModel.metadata.create_all(bind=engine)
     yield
@@ -30,9 +30,7 @@ def test_db():
 app.dependency_overrides[get_session] = override_get_session
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope='class')
 def test_client():
     with TestClient(app) as client:
         yield client
-
-

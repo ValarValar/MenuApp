@@ -5,7 +5,7 @@ from sqlmodel import select
 
 from api.v1.schemas.submenus import SubmenuBase, SubmenuUpdate
 from db.repositories.base import AbstractRepository
-from models import Submenu, Dish
+from models import Submenu
 
 
 class SubmenuRepository(AbstractRepository):
@@ -20,17 +20,19 @@ class SubmenuRepository(AbstractRepository):
             Submenu.id,
             Submenu.description,
             Submenu.title,
-            func.count(Submenu.dishes).label("dishes_count")
+            func.count(Submenu.dishes).label('dishes_count'),
         ).where(
-            Submenu.menu_id == menu_id
+            Submenu.menu_id == menu_id,
         ).join(
-            Submenu.dishes, isouter=True
+            Submenu.dishes, isouter=True,
         ).group_by(Submenu.id)
         results = self.session.execute(statement=statement).all()
         return results
 
     def get_by_ids(self, menu_id: str, submenu_id: str) -> Optional[Submenu]:
-        statement = select(Submenu).where(Submenu.menu_id == menu_id).where(Submenu.id == submenu_id)
+        statement = select(Submenu).where(
+            Submenu.menu_id == menu_id,
+        ).where(Submenu.id == submenu_id)
         detailed_submenu = self.session.exec(statement).one_or_none()
         return detailed_submenu
 
@@ -39,16 +41,16 @@ class SubmenuRepository(AbstractRepository):
             Submenu.id,
             Submenu.description,
             Submenu.title,
-            func.count(Submenu.dishes).label("dishes_count")
+            func.count(Submenu.dishes).label('dishes_count'),
         ).where(
-            Submenu.menu_id == menu_id
+            Submenu.menu_id == menu_id,
         ).where(
-            Submenu.id == submenu_id
+            Submenu.id == submenu_id,
         ).join(Submenu.dishes, isouter=True).group_by(Submenu.id)
         submenu = self.session.exec(statement).one_or_none()
         return submenu
 
-    def update(self, menu_id: str, submenu_id: str, update_submenu: SubmenuUpdate) -> Submenu:
+    def update(self, menu_id: str, submenu_id: str, update_submenu: SubmenuUpdate) -> Optional[Submenu]:
         submenu = self.get_by_ids(menu_id, submenu_id)
         if submenu:
             update_menu = update_submenu.dict(exclude_unset=True)

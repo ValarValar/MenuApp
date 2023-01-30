@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from typing import Optional, Union
 
 __all__ = (
-    "AbstractCache",
-    "get_cache",
+    'AbstractCache',
+    'get_cache',
 )
 
 
@@ -37,5 +37,5 @@ cache: Optional[AbstractCache] = None
 
 
 # Функция понадобится при внедрении зависимостей
-def get_cache() -> AbstractCache:
+def get_cache() -> Optional[AbstractCache]:
     return cache

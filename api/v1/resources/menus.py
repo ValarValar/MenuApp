@@ -1,66 +1,73 @@
+import http
+
 from fastapi import APIRouter, Depends
 
-from api.v1.schemas.menus import MenuCreate, MenuBase, MenuUpdate, MenuList, MenuDetail
-from services.menu_service import get_menu_service, MenuService
+from api.v1.schemas.menus import MenuBase, MenuCreate, MenuDetail, MenuList, MenuUpdate
+from services.menu_service import MenuService, get_menu_service
 
 router = APIRouter()
 
 
 @router.post(
-    path="/",
-    summary="Create menu",
-    tags=["menus"],
+    path='/',
+    summary='Create menu',
+    tags=['menus'],
     response_model=MenuCreate,
-    status_code=201
+    status_code=http.HTTPStatus.CREATED,
 )
 def create_menu(menu: MenuBase, menu_service: MenuService = Depends(get_menu_service)):
     return menu_service.create(menu)
 
 
 @router.get(
-    path="/",
-    summary="List menus",
-    tags=["menus"],
-    response_model=MenuList
+    path='/',
+    summary='List menus',
+    tags=['menus'],
+    response_model=MenuList,
+    status_code=http.HTTPStatus.OK,
 )
 def list_menu(menu_service: MenuService = Depends(get_menu_service)):
     return menu_service.get_list()
 
 
 @router.get(
-    path="/{menu_id}",
-    summary="Detailed menu",
-    tags=["menus"],
-    response_model=MenuDetail
+    path='/{menu_id}',
+    summary='Detailed menu',
+    tags=['menus'],
+    response_model=MenuDetail,
+    status_code=http.HTTPStatus.OK,
 )
 def get_menu(
         menu_id: str,
-        menu_service: MenuService = Depends(get_menu_service)
+        menu_service: MenuService = Depends(get_menu_service),
 ):
     return menu_service.get_detail(menu_id)
 
 
 @router.patch(
-    path="/{menu_id}",
-    summary="Update menu",
-    tags=["menus"],
-    response_model=MenuCreate
+    path='/{menu_id}',
+    summary='Update menu',
+    tags=['menus'],
+    response_model=MenuCreate,
+    status_code=http.HTTPStatus.OK,
 )
 def update_menu(
         menu_id: str,
         new_menu: MenuUpdate,
-        menu_service: MenuService = Depends(get_menu_service)
+        menu_service: MenuService = Depends(get_menu_service),
 ):
     return menu_service.update(menu_id, new_menu)
 
 
 @router.delete(
-    path="/{menu_id}",
-    summary="Delete menu",
-    tags=["menus"]
+    path='/{menu_id}',
+    summary='Delete menu',
+    tags=['menus'],
+    response_model=dict,
+    status_code=http.HTTPStatus.OK,
 )
 def delete_menu(
         menu_id: str,
-        menu_service: MenuService = Depends(get_menu_service)
+        menu_service: MenuService = Depends(get_menu_service),
 ):
     return menu_service.delete(menu_id)

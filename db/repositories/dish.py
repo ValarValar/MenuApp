@@ -15,20 +15,20 @@ class DishRepository(AbstractRepository):
 
     def list(self, menu_id: str, submenu_id: str) -> list[Dish]:
         statement = select(Dish).join(Submenu).where(
-            Dish.submenu_id == submenu_id
+            Dish.submenu_id == submenu_id,
         ).where(
-            Submenu.menu_id == menu_id
+            Submenu.menu_id == menu_id,
         )
         results = self.session.exec(statement).all()
         return results
 
     def get(self, menu_id: str, submenu_id: str, dish_id: str) -> Optional[Dish]:
         statement = select(Dish).join(Submenu).where(
-            Dish.submenu_id == submenu_id
+            Dish.submenu_id == submenu_id,
         ).where(
-            Submenu.menu_id == menu_id
+            Submenu.menu_id == menu_id,
         ).where(
-            Dish.id == dish_id
+            Dish.id == dish_id,
         )
         detailed_dish = self.session.exec(statement).one_or_none()
         return detailed_dish
@@ -38,8 +38,8 @@ class DishRepository(AbstractRepository):
             menu_id: str,
             submenu_id: str,
             dish_id: str,
-            update_submenu: DishUpdate
-    ) -> Dish:
+            update_submenu: DishUpdate,
+    ) -> Optional[Dish]:
         current_dish = self.get(menu_id, submenu_id, dish_id)
         if current_dish:
             update_menu = update_submenu.dict(exclude_unset=True)

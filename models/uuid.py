@@ -1,7 +1,7 @@
 import uuid as uuid_pkg
 
 from sqlalchemy import text
-from sqlmodel import SQLModel, Field
+from sqlmodel import Field, SQLModel
 
 
 class UUIDModel(SQLModel):
@@ -11,6 +11,6 @@ class UUIDModel(SQLModel):
         index=True,
         nullable=False,
         sa_column_kwargs={
-            "server_default": text("gen_random_uuid()")
-        }
+            'server_default': text('gen_random_uuid()'),
+        },
     )

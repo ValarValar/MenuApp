@@ -1,0 +1,54 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+    -   id: trailing-whitespace
+    -   id: check-added-large-files
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: check-json
+    -   id: check-case-conflict
+    -   id: check-merge-conflict
+    -   id: debug-statements
+    -   id: double-quote-string-fixer
+        exclude: models
+    -   id: requirements-txt-fixer
+
+#Сортировка испортов в проекте
+-   repo: https://github.com/pycqa/isort
+    rev: 5.5.2
+    hooks:
+    -   id: isort
+        exclude: __init__.py */env.py
+        args: [--profile, black, --filter-files]
+
+-   repo: https://github.com/asottile/add-trailing-comma
+    rev: v2.2.2
+    hooks:
+    -   id: add-trailing-comma
+        args: [--py36-plus]
+
+-   repo: https://github.com/asottile/pyupgrade
+    rev: v2.31.1
+    hooks:
+    -   id: pyupgrade
+        args: [--py39-plus]
+
+-   repo: https://github.com/pre-commit/mirrors-autopep8
+    rev: v2.0.1
+    hooks:
+    -   id: autopep8
+
+-   repo: https://github.com/PyCQA/flake8
+    rev: 6.0.0
+    hooks:
+    -   id: flake8
+        args: ["--ignore=E501,F821", "--extend-exclude=*/__init__.py,*/env.py"]
+
+
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.991
+    hooks:
+    -   id: mypy
+        additional_dependencies: [types-redis==4.4.0.4]
+        args: [--no-strict-optional, --ignore-missing-imports, --config-file=mypy.ini]

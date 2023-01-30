@@ -10,39 +10,44 @@ settings = get_settings()
 
 app = FastAPI(
     title=settings.APP_NAME,
-    docs_url=f"{settings.API_V1_STR}/openapi",
-    redoc_url=f"{settings.API_V1_STR}/redoc",
+    docs_url=f'{settings.API_V1_STR}/openapi',
+    redoc_url=f'{settings.API_V1_STR}/redoc',
     # Адрес документации в формате OpenAPI
-    openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    openapi_url=f'{settings.API_V1_STR}/openapi.json',
 )
 
 
-@app.get("/")
+@app.get('/')
 def root():
-    return {"message": "Hello World"}
+    return {'message': 'Hello World'}
 
 
-@app.on_event("startup")
+@app.on_event('startup')
 def startup_db_client():
     pass
 
 
-@app.on_event("shutdown")
+@app.on_event('shutdown')
 def shutdown_db_client():
     pass
 
 
-submenus_router.include_router(router=dishes_router, prefix="/{submenu_id}/dishes", tags=["dishes"])
-menus_router.include_router(router=submenus_router, prefix="/{menu_id}/submenus")
-app.include_router(router=menus_router, prefix=f"{settings.API_V1_STR}/menus")
+submenus_router.include_router(
+    router=dishes_router, prefix='/{submenu_id}/dishes', tags=['dishes'],
+)
+menus_router.include_router(
+    router=submenus_router,
+    prefix='/{menu_id}/submenus',
+)
+app.include_router(router=menus_router, prefix=f'{settings.API_V1_STR}/menus')
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # Приложение может запускаться командой
     # `uvicorn main:app --host 0.0.0.0 --port 8000`
     # но чтобы не терять возможность использовать дебагер,
     # запустим uvicorn сервер через python
     uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
+        'main:app',
+        host='0.0.0.0',
         port=8000,
     )
