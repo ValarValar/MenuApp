@@ -14,9 +14,8 @@ class TestsSettings(BaseSettings):
     POSTGRES_PORT: int
     POSTGRES_TEST_URL: str
 
-
     class Config:
-        env_file = find_dotenv(filename='../.env.tests', usecwd=True)
+        env_file = find_dotenv(filename='.env.tests', usecwd=True)
 
 
 @lru_cache

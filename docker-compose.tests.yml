@@ -16,4 +16,3 @@ services:
 networks:
   menuapp_menu_network:
     external: true
-
