@@ -8,13 +8,12 @@ services:
       context: .
       dockerfile: DockerfileTest
     env_file:
-      - .env.dev
+      - .env.tests
     command: "pytest -vv"
     networks:
-      - menu_network
-    depends_on:
-      menu_postgres_db:
-        condition: service_healthy
+      - menuapp_menu_network
 
 networks:
-  menu_network:
+  menuapp_menu_network:
+    external: true
+

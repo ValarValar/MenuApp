@@ -3,11 +3,11 @@ from sqlalchemy_utils import create_database, database_exists
 from sqlmodel import Session, SQLModel, create_engine
 from starlette.testclient import TestClient
 
-from core.config import get_settings
 from db.db import get_session
 from main import app
+from tests.config import get_test_settings
 
-settings = get_settings()
+settings = get_test_settings()
 
 engine = create_engine(settings.POSTGRES_TEST_URL)
 database_exists = database_exists(engine.url)
