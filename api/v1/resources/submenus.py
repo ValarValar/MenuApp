@@ -2,6 +2,7 @@ import http
 
 from fastapi import APIRouter, Depends
 
+from api.v1.schemas.service import DeleteBase
 from api.v1.schemas.submenus import (
     SubmenuBase,
     SubmenuCreate,
@@ -78,7 +79,7 @@ def update_submenu(
     path='/{submenu_id}',
     summary='Delete submenu',
     tags=['submenus'],
-    response_model=dict,
+    response_model=DeleteBase,
     status_code=http.HTTPStatus.OK,
 )
 def delete_submenu(

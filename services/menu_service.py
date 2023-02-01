@@ -5,6 +5,7 @@ from fastapi import Depends, HTTPException
 from sqlmodel import Session
 
 from api.v1.schemas.menus import MenuBase, MenuCreate, MenuDetail, MenuList, MenuUpdate
+from api.v1.schemas.service import DeleteBase
 from db.cache.base import AbstractCache
 from db.cache.RedisCache import get_redis_cache
 from db.db import get_session
@@ -61,12 +62,12 @@ class MenuService(ServiceMixin):
         self.clear_cache(id)
         return response
 
-    def delete(self, id: str) -> dict:
+    def delete(self, id: str) -> DeleteBase:
         with self.uow:
             deleted = self.uow.menu_repo.delete(id)
         self.clear_cache(id)
         if deleted:
-            return {'deleted': deleted}
+            return DeleteBase(deleted=deleted)
         else:
             raise HTTPException(status_code=404, detail='menu not found')
 

@@ -4,6 +4,7 @@ from typing import Optional
 from fastapi import Depends, HTTPException
 from sqlmodel import Session
 
+from api.v1.schemas.service import DeleteBase
 from api.v1.schemas.submenus import (
     SubmenuBase,
     SubmenuCreate,
@@ -47,7 +48,7 @@ class SubmenuService(ServiceMixin):
         self.clear_cache(menu_id)
         return response
 
-    def get_list(self, menu_id: str) -> list[SubmenuList]:
+    def get_list(self, menu_id: str) -> SubmenuList:
         self.menu_exists(menu_id)
 
         cache_value = self.cache.get(self.list_cache_key)
@@ -90,12 +91,12 @@ class SubmenuService(ServiceMixin):
         self.clear_cache(menu_id, submenu_id)
         return response
 
-    def delete(self, menu_id: str, submenu_id: str) -> dict:
+    def delete(self, menu_id: str, submenu_id: str) -> DeleteBase:
         with self.uow:
             deleted = self.uow.submenu_repo.delete(menu_id, submenu_id)
         self.clear_cache(menu_id, submenu_id)
         if deleted:
-            return {'deleted': deleted}
+            return DeleteBase(deleted=deleted)
         else:
             raise HTTPException(status_code=404, detail='menu not found')
 

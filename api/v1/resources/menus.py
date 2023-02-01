@@ -3,6 +3,7 @@ import http
 from fastapi import APIRouter, Depends
 
 from api.v1.schemas.menus import MenuBase, MenuCreate, MenuDetail, MenuList, MenuUpdate
+from api.v1.schemas.service import DeleteBase
 from services.menu_service import MenuService, get_menu_service
 
 router = APIRouter()
@@ -63,7 +64,7 @@ def update_menu(
     path='/{menu_id}',
     summary='Delete menu',
     tags=['menus'],
-    response_model=dict,
+    response_model=DeleteBase,
     status_code=http.HTTPStatus.OK,
 )
 def delete_menu(

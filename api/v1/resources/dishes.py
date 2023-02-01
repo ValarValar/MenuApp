@@ -3,6 +3,7 @@ import http
 from fastapi import APIRouter, Depends
 
 from api.v1.schemas.dishes import DishBase, DishCreate, DishList, DishUpdate
+from api.v1.schemas.service import DeleteBase
 from services.dish_service import DishService, get_dish_service
 
 router = APIRouter()
@@ -71,7 +72,7 @@ def update_dish(
 @router.delete(
     path='/{dish_id}',
     summary='Delete dish',
-    response_model=dict,
+    response_model=DeleteBase,
     status_code=http.HTTPStatus.OK,
 )
 def delete_dish(

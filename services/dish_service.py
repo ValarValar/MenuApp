@@ -5,6 +5,7 @@ from fastapi import Depends, HTTPException
 from sqlmodel import Session
 
 from api.v1.schemas.dishes import DishBase, DishCreate, DishList, DishUpdate
+from api.v1.schemas.service import DeleteBase
 from db.cache.base import AbstractCache
 from db.cache.RedisCache import get_redis_cache
 from db.db import get_session
@@ -91,12 +92,12 @@ class DishService(ServiceMixin):
         self.clear_cache(menu_id, submenu_id, dish_id)
         return response
 
-    def delete(self, menu_id: str, submenu_id: str, dish_id: str) -> dict:
+    def delete(self, menu_id: str, submenu_id: str, dish_id: str) -> DeleteBase:
         with self.uow:
             deleted = self.uow.dish_repo.delete(menu_id, submenu_id, dish_id)
         self.clear_cache(menu_id, submenu_id, dish_id)
         if deleted:
-            return {'deleted': deleted}
+            return DeleteBase(deleted=deleted)
         else:
             raise HTTPException(status_code=404, detail='dish not found')
 
