@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from typing import Optional, Union
 
 __all__ = (
-    'AbstractCache',
-    'get_cache',
+    "AbstractCache",
+    "get_cache",
 )
 
 
@@ -17,10 +17,10 @@ class AbstractCache(ABC):
 
     @abstractmethod
     def set(
-            self,
-            key: str,
-            value: Union[bytes, str],
-            expire: int = 600,
+        self,
+        key: str,
+        value: Union[bytes, str],
+        expire: int = 600,
     ):
         pass
 

@@ -6,7 +6,7 @@ class DeleteBase(BaseModel):
 
     class Config:
         schema_extra = {
-            'example': {
-                'deleted': 'True',
+            "example": {
+                "deleted": "True",
             },
         }

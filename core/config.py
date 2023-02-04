@@ -5,7 +5,7 @@ from pydantic import BaseSettings
 
 
 class Settings(BaseSettings):
-    API_V1_STR: str = '/api/v1'
+    API_V1_STR: str = "/api/v1"
     APP_NAME: str
     POSTGRES_DB: str
     POSTGRES_USER: str
@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     REDIS_PORT: int
 
     class Config:
-        env_file = find_dotenv(filename='.env.dev', usecwd=True)
+        env_file = find_dotenv(filename=".env.dev", usecwd=True)
 
 
 @lru_cache

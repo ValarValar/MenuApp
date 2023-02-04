@@ -1,7 +1,8 @@
 import pytest
-from sqlalchemy_utils import create_database, database_exists
-from sqlmodel import Session, SQLModel, create_engine
-from starlette.testclient import TestClient
+from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
+from sqlmodel import SQLModel
 
 from db.db import get_session
 from main import app
@@ -9,28 +10,45 @@ from tests.config import get_test_settings
 
 settings = get_test_settings()
 
-engine = create_engine(settings.POSTGRES_TEST_URL)
-database_exists = database_exists(engine.url)
-if not database_exists:
-    create_database(engine.url)
+engine = create_async_engine(settings.POSTGRES_TEST_URL, future=True)
 
 
-def override_get_session():
-    with Session(bind=engine, autocommit=False, autoflush=False) as session:
+async def override_get_session():
+    async_session = sessionmaker(
+        engine,
+        autocommit=False,
+        autoflush=False,
+        expire_on_commit=False,
+        class_=AsyncSession,
+    )
+    async with async_session() as session:
         yield session
-
-
-@pytest.fixture(scope='class')
-def test_db():
-    SQLModel.metadata.create_all(bind=engine)
-    yield
-    SQLModel.metadata.drop_all(bind=engine)
 
 
 app.dependency_overrides[get_session] = override_get_session
 
 
-@pytest.fixture(scope='class')
-def test_client():
-    with TestClient(app) as client:
+@pytest.fixture
+def anyio_backend():
+    return "asyncio"
+
+
+@pytest.mark.anyio
+@pytest.fixture(scope="function", autouse=True)
+async def test_db():
+    async with engine.begin() as conn:
+        await conn.run_sync(SQLModel.metadata.create_all)
+
+    yield
+
+    async with engine.begin() as conn:
+        await conn.run_sync(SQLModel.metadata.drop_all)
+
+    await engine.dispose()
+
+
+@pytest.mark.anyio
+@pytest.fixture(scope="function")
+async def test_client():
+    async with AsyncClient(app=app, base_url="http://") as client:
         yield client

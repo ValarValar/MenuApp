@@ -8,81 +8,105 @@ from models import Menu, Submenu
 
 
 class MenuRepository(AbstractRepository):
-    def create(self, menu: MenuBase) -> Menu:
+    async def create(self, menu: MenuBase) -> Menu:
         new_menu = Menu.from_orm(menu)
         self.session.add(new_menu)
         return new_menu
 
-    def list(self) -> list[Menu]:
-        subquery = select(
-            Submenu.id,
-            Submenu.description,
-            Submenu.title,
-            Submenu.menu_id,
-            func.count(Submenu.dishes).label('dishes_count'),
-        ).join(
-            Submenu.dishes, isouter=True,
-        ).group_by(Submenu.id).subquery()
-        statement = select(
-            Menu.id,
-            Menu.description,
-            Menu.title,
-            func.count(subquery.c.id).label('submenus_count'),
-            func.coalesce(
-                func.sum(subquery.c.dishes_count),
-                0,
-            ).label('dishes_count'),
-        ).outerjoin(
-            subquery, Menu.id == subquery.c.menu_id,
-        ).group_by(Menu.id)
-        results = self.session.exec(statement).all()
-        return results
+    async def list(self) -> list[Menu]:
+        subquery = (
+            select(
+                Submenu.id,
+                Submenu.description,
+                Submenu.title,
+                Submenu.menu_id,
+                func.count(Submenu.dishes).label("dishes_count"),
+            )
+            .join(
+                Submenu.dishes,
+                isouter=True,
+            )
+            .group_by(Submenu.id)
+            .subquery()
+        )
+        statement = (
+            select(
+                Menu.id,
+                Menu.description,
+                Menu.title,
+                func.count(subquery.c.id).label("submenus_count"),
+                func.coalesce(
+                    func.sum(subquery.c.dishes_count),
+                    0,
+                ).label("dishes_count"),
+            )
+            .outerjoin(
+                subquery,
+                Menu.id == subquery.c.menu_id,
+            )
+            .group_by(Menu.id)
+        )
+        results = await self.session.execute(statement)
+        menus: list[Menu] = results.all()
+        return menus
 
-    def get_by_id(self, id: str) -> Optional[Menu]:
-        menu = self.session.get(Menu, id)
+    async def get(self, id: str) -> Optional[Menu]:
+        menu = await self.session.get(Menu, id)
         return menu
 
-    def get_by_id_with_counts(self, id: str) -> Optional[Menu]:
-        subquery = select(
-            Submenu.id,
-            Submenu.description,
-            Submenu.title,
-            Submenu.menu_id,
-            func.count(Submenu.dishes).label('dishes_count'),
-        ).where(
-            Submenu.menu_id == id,
-        ).join(
-            Submenu.dishes, isouter=True,
-        ).group_by(Submenu.id).subquery()
-        statement = select(
-            Menu.id,
-            Menu.description,
-            Menu.title,
-            func.count(subquery.c.id).label('submenus_count'),
-            func.coalesce(
-                func.sum(subquery.c.dishes_count),
-                0,
-            ).label('dishes_count'),
-        ).where(
-            Menu.id == id,
-        ).outerjoin(
-            subquery, Menu.id == subquery.c.menu_id,
-        ).group_by(Menu.id)
-        results = self.session.exec(statement).one_or_none()
-        return results
+    async def get_detail(self, id: str) -> Optional[Menu]:
+        subquery = (
+            select(
+                Submenu.id,
+                Submenu.description,
+                Submenu.title,
+                Submenu.menu_id,
+                func.count(Submenu.dishes).label("dishes_count"),
+            )
+            .where(
+                Submenu.menu_id == id,
+            )
+            .join(
+                Submenu.dishes,
+                isouter=True,
+            )
+            .group_by(Submenu.id)
+            .subquery()
+        )
+        statement = (
+            select(
+                Menu.id,
+                Menu.description,
+                Menu.title,
+                func.count(subquery.c.id).label("submenus_count"),
+                func.coalesce(
+                    func.sum(subquery.c.dishes_count),
+                    0,
+                ).label("dishes_count"),
+            )
+            .where(
+                Menu.id == id,
+            )
+            .outerjoin(
+                subquery,
+                Menu.id == subquery.c.menu_id,
+            )
+            .group_by(Menu.id)
+        )
+        results = await self.session.execute(statement)
+        menu: Optional[Menu] = results.one_or_none()
+        return menu
 
-    def update(self, id: str, update_menu: MenuUpdate) -> Optional[Menu]:
-        menu = self.get_by_id(id)
-        if menu:
+    async def update(self, id: str, update_menu: MenuUpdate) -> Optional[Menu]:
+        if menu := await self.get(id):
             update_menu = update_menu.dict(exclude_unset=True)
             for key, value in update_menu.items():
                 setattr(menu, key, value)
             self.session.add(menu)
         return menu
 
-    def delete(self, id: str) -> bool:
-        menu = self.get_by_id(id)
-        if menu:
-            self.session.delete(menu)
+    async def delete(self, id: str) -> bool:
+        if menu := await self.get(id):
+            await self.session.delete(menu)
             return True
         return False

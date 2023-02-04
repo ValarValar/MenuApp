@@ -1,9 +1,6 @@
 ## Базовый образ для сборки
 FROM python:3.10-slim
 
-RUN apt-get update \
-    && apt-get -y install libpq-dev gcc \
-    && pip install psycopg2
 # Указываем рабочую директорию
 WORKDIR /usr/src/app
 ENV PYTHONPATH /usr/src/app

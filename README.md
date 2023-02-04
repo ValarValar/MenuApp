@@ -16,7 +16,7 @@ __reminder__: don't forger to configure your interpreter and activate venv.
 ## Task summary
 FastAPI app with PostgresSQL as db.
 At this moment implemented:
-- 3 models (menu, submenu, dishes) and their ralations
+- 3 models (menu, submenu, dishes) and their relations
 - CRUD endpoints for them
 - Pytest CRUD tests.
 Tests are in a separate container, running by docker-compose command.

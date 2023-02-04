@@ -11,5 +11,5 @@ class Dish(UUIDModel, table=True):
     title: str
     description: str
     price: condecimal(decimal_places=2) = Field(default=0)
-    submenu_id: uuid_pkg.UUID = Field(foreign_key='submenu.id')
-    submenu: Submenu = Relationship(back_populates='dishes')
+    submenu_id: uuid_pkg.UUID = Field(foreign_key="submenu.id")
+    submenu: Submenu = Relationship(back_populates="dishes")

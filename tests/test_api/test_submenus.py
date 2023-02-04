@@ -1,154 +1,198 @@
 from uuid import UUID
 
 import pytest
-from starlette.testclient import TestClient
+from httpx import AsyncClient
+
+from main import app
+
+pytestmark = pytest.mark.anyio
 
 
-class TestSubmenu:
-    @pytest.fixture(scope='class')
-    def base_url(self, test_client: TestClient, test_db):
-        base_url = '/api/v1/menus/'
-        new_menu = {
-            'title': 'My menu 1',
-            'description': 'My menu description 1',
-        }
-        response = test_client.post(base_url, json=new_menu)
-        menu_id = response.json()['id']
-        return f'/api/v1/menus/{menu_id}/submenus/'
+@pytest.fixture(scope="function")
+async def menu_id(test_client: AsyncClient, test_db):
+    base_url = app.url_path_for("create_menu")
+    new_menu = {
+        "title": "My menu 1",
+        "description": "My menu description 1",
+    }
+    response = await test_client.post(base_url, json=new_menu)
+    menu_id = response.json()["id"]
+    return menu_id
 
-    def test_empty_submenus(self, test_client: TestClient, test_db, base_url):
-        response = test_client.get(base_url)
-        assert response.status_code == 200
-        expected_answer: list = []
-        assert expected_answer == response.json()
 
-    def test_submenu_create(self, test_client: TestClient, test_db, base_url):
-        new_submenu = {
-            'title': 'My submenu 1',
-            'description': 'My submenu description 1',
-        }
-        response = test_client.post(base_url, json=new_submenu)
+async def test_empty_submenus(test_client: AsyncClient, menu_id):
+    base_url = app.url_path_for("list_submenu", menu_id=menu_id)
+    response = await test_client.get(base_url)
 
-        assert response.status_code == 201
+    assert response.status_code == 200
+    expected_answer: list = []
+    assert expected_answer == response.json()
 
-        expected_answer = {
-            'title': 'My submenu 1',
-            'description': 'My submenu description 1',
-        }
-        response_dict = response.json()
-        assert expected_answer['title'] == response_dict['title']
-        assert expected_answer['description'] == response_dict['description']
-        assert isinstance(UUID(response_dict['id']), UUID)
 
-    def test_detailed_submenu(self, test_client: TestClient, test_db, base_url):
-        new_submenu = {
-            'title': 'My submenu 1',
-            'description': 'My submenu description 1',
-        }
-        response = test_client.post(base_url, json=new_submenu)
+async def test_submenu_create(test_client: AsyncClient, menu_id):
+    base_url = app.url_path_for("create_submenu", menu_id=menu_id)
+    new_submenu = {
+        "title": "My submenu 1",
+        "description": "My submenu description 1",
+    }
+    response = await test_client.post(base_url, json=new_submenu)
 
-        last_uuid = response.json()['id']
-        url = base_url + last_uuid
+    assert response.status_code == 201
 
-        response = test_client.get(url)
-        expected_answer = {
-            'title': 'My submenu 1',
-            'description': 'My submenu description 1',
-            'dishes_count': 0,
-            'id': last_uuid,
-        }
-        response_dict = response.json()
-        assert response.status_code == 200
-        assert expected_answer['title'] == response_dict['title']
-        assert expected_answer['description'] == response_dict['description']
-        assert expected_answer['dishes_count'] == response_dict['dishes_count']
-        assert expected_answer['id'] == response_dict['id']
+    expected_answer = {
+        "title": "My submenu 1",
+        "description": "My submenu description 1",
+    }
+    response_dict = response.json()
+    assert expected_answer["title"] == response_dict["title"]
+    assert expected_answer["description"] == response_dict["description"]
+    assert isinstance(UUID(response_dict["id"]), UUID)
 
-    def test_detailed_submenu_invalid(self, test_client: TestClient, test_db, base_url):
-        new_submenu = {
-            'title': 'My submenu 1',
-            'description': 'My submenu description 1',
-        }
-        response = test_client.post(base_url, json=new_submenu)
 
-        last_uuid = response.json()['id']
-        last_uuid = last_uuid[:-5] + '1' * 5
-        url = base_url + last_uuid
+async def test_detailed_submenu(test_client: AsyncClient, menu_id):
+    base_url = app.url_path_for("create_submenu", menu_id=menu_id)
+    new_submenu = {
+        "title": "My submenu 1",
+        "description": "My submenu description 1",
+    }
+    response = await test_client.post(base_url, json=new_submenu)
 
-        response = test_client.get(url)
-        assert response.status_code == 404
+    submenu_id = response.json()["id"]
+    url = app.url_path_for(
+        "get_submenu",
+        menu_id=menu_id,
+        submenu_id=submenu_id,
+    )
 
-    def test_delete_submenu(self, test_client: TestClient, test_db, base_url):
-        new_submenu = {
-            'title': 'My submenu 1',
-            'description': 'My submenu description 1',
-        }
-        response = test_client.post(base_url, json=new_submenu)
+    response = await test_client.get(url)
+    expected_answer = {
+        "title": "My submenu 1",
+        "description": "My submenu description 1",
+        "dishes_count": 0,
+        "id": submenu_id,
+    }
+    response_dict = response.json()
+    assert response.status_code == 200
+    assert expected_answer["title"] == response_dict["title"]
+    assert expected_answer["description"] == response_dict["description"]
+    assert expected_answer["dishes_count"] == response_dict["dishes_count"]
+    assert expected_answer["id"] == response_dict["id"]
 
-        last_uuid = response.json()['id']
-        url = base_url + last_uuid
 
-        response = test_client.delete(url)
-        expected_answer = {
-            'deleted': True,
-        }
-        assert response.status_code == 200
-        assert expected_answer == response.json()
+async def test_detailed_submenu_invalid(test_client: AsyncClient, menu_id):
+    base_url = app.url_path_for("create_submenu", menu_id=menu_id)
+    new_submenu = {
+        "title": "My submenu 1",
+        "description": "My submenu description 1",
+    }
+    response = await test_client.post(base_url, json=new_submenu)
 
-    def test_delete_submenu_invalid(self, test_client: TestClient, test_db, base_url):
-        new_submenu = {
-            'title': 'My submenu 1',
-            'description': 'My submenu description 1',
-        }
-        response = test_client.post(base_url, json=new_submenu)
+    submenu_id = response.json()["id"]
+    submenu_id = submenu_id[:-5] + "1" * 5
+    url = app.url_path_for(
+        "get_submenu",
+        menu_id=menu_id,
+        submenu_id=submenu_id,
+    )
 
-        last_uuid = response.json()['id']
-        last_uuid = last_uuid[:-5] + '1' * 5
-        url = base_url + last_uuid
+    response = await test_client.get(url)
+    assert response.status_code == 404
 
-        response = test_client.delete(url)
-        assert response.status_code == 404
 
-    def test_patch_submenu(self, test_client: TestClient, test_db, base_url):
-        new_submenu = {
-            'title': 'My submenu 1',
-            'description': 'My submenu description 1',
-        }
-        response = test_client.post(base_url, json=new_submenu)
+async def test_delete_submenu(test_client: AsyncClient, menu_id):
+    base_url = app.url_path_for("create_submenu", menu_id=menu_id)
+    new_submenu = {
+        "title": "My submenu 1",
+        "description": "My submenu description 1",
+    }
+    response = await test_client.post(base_url, json=new_submenu)
 
-        last_uuid = response.json()['id']
+    submenu_id = response.json()["id"]
+    url = app.url_path_for(
+        "delete_submenu",
+        menu_id=menu_id,
+        submenu_id=submenu_id,
+    )
 
-        url = base_url + last_uuid
-        updated_submenu = {
-            'title': 'updated My submenu 1',
-            'description': 'updated My submenu description 1',
-        }
-        response = test_client.patch(url, json=updated_submenu)
-        expected_answer = {
-            'title': 'updated My submenu 1',
-            'description': 'updated My submenu description 1',
-            'id': last_uuid,
-        }
-        response_dict = response.json()
-        assert response.status_code == 200
-        assert expected_answer['title'] == response_dict['title']
-        assert expected_answer['description'] == response_dict['description']
-        assert expected_answer['id'] == response_dict['id']
+    response = await test_client.delete(url)
+    expected_answer = {
+        "deleted": True,
+    }
+    assert response.status_code == 200
+    assert expected_answer == response.json()
 
-    def test_patch_submenu_invalid(self, test_client: TestClient, test_db, base_url):
-        new_submenu = {
-            'title': 'My submenu 1',
-            'description': 'My submenu description 1',
-        }
-        response = test_client.post(base_url, json=new_submenu)
 
-        last_uuid = response.json()['id']
-        last_uuid = last_uuid[:-5] + '1' * 5
-        url = base_url + last_uuid
+async def test_delete_submenu_invalid(test_client: AsyncClient, menu_id):
+    base_url = app.url_path_for("create_submenu", menu_id=menu_id)
+    new_submenu = {
+        "title": "My submenu 1",
+        "description": "My submenu description 1",
+    }
+    response = await test_client.post(base_url, json=new_submenu)
 
-        updated_submenu = {
-            'title': 'updated My submenu 1',
-            'description': 'updated My submenu description 1',
-        }
-        response = test_client.patch(url, json=updated_submenu)
-        assert response.status_code == 404
+    submenu_id = response.json()["id"]
+    submenu_id = submenu_id[:-5] + "1" * 5
+    url = app.url_path_for(
+        "delete_submenu",
+        menu_id=menu_id,
+        submenu_id=submenu_id,
+    )
+
+    response = await test_client.delete(url)
+    assert response.status_code == 404
+
+
+async def test_patch_submenu(test_client: AsyncClient, menu_id):
+    base_url = app.url_path_for("create_submenu", menu_id=menu_id)
+    new_submenu = {
+        "title": "My submenu 1",
+        "description": "My submenu description 1",
+    }
+    response = await test_client.post(base_url, json=new_submenu)
+
+    submenu_id = response.json()["id"]
+
+    url = app.url_path_for(
+        "update_submenu",
+        menu_id=menu_id,
+        submenu_id=submenu_id,
+    )
+    updated_submenu = {
+        "title": "updated My submenu 1",
+        "description": "updated My submenu description 1",
+    }
+    response = await test_client.patch(url, json=updated_submenu)
+    expected_answer = {
+        "title": "updated My submenu 1",
+        "description": "updated My submenu description 1",
+        "id": submenu_id,
+    }
+    response_dict = response.json()
+    assert response.status_code == 200
+    assert expected_answer["title"] == response_dict["title"]
+    assert expected_answer["description"] == response_dict["description"]
+    assert expected_answer["id"] == response_dict["id"]
+
+
+async def test_patch_submenu_invalid(test_client: AsyncClient, menu_id):
+    base_url = app.url_path_for("create_submenu", menu_id=menu_id)
+    new_submenu = {
+        "title": "My submenu 1",
+        "description": "My submenu description 1",
+    }
+    response = await test_client.post(base_url, json=new_submenu)
+
+    submenu_id = response.json()["id"]
+    submenu_id = submenu_id[:-5] + "1" * 5
+    url = app.url_path_for(
+        "update_submenu",
+        menu_id=menu_id,
+        submenu_id=submenu_id,
+    )
+
+    updated_submenu = {
+        "title": "updated My submenu 1",
+        "description": "updated My submenu description 1",
+    }
+    response = await test_client.patch(url, json=updated_submenu)
+    assert response.status_code == 404

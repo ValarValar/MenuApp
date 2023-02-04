@@ -11,6 +11,6 @@ class UUIDModel(SQLModel):
         index=True,
         nullable=False,
         sa_column_kwargs={
-            'server_default': text('gen_random_uuid()'),
+            "server_default": text("gen_random_uuid()"),
         },
     )

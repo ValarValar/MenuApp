@@ -5,7 +5,7 @@ from pydantic import BaseSettings
 
 
 class TestsSettings(BaseSettings):
-    API_V1_STR: str = '/api/v1'
+    API_V1_STR: str = "/api/v1"
     APP_NAME: str
     POSTGRES_DB: str
     POSTGRES_USER: str
@@ -15,7 +15,7 @@ class TestsSettings(BaseSettings):
     POSTGRES_TEST_URL: str
 
     class Config:
-        env_file = find_dotenv(filename='.env.tests', usecwd=True)
+        env_file = find_dotenv(filename=".env.tests", usecwd=True)
 
 
 @lru_cache
