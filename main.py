@@ -4,6 +4,8 @@ from fastapi import FastAPI
 from api.v1.resources.dishes import router as dishes_router
 from api.v1.resources.menus import router as menus_router
 from api.v1.resources.submenus import router as submenus_router
+from api.v1.resources.data import router as data_router
+
 from core.config import get_settings
 
 settings = get_settings()
@@ -42,6 +44,8 @@ menus_router.include_router(
     prefix="/{menu_id}/submenus",
 )
 app.include_router(router=menus_router, prefix=f"{settings.API_V1_STR}/menus")
+
+app.include_router(router=data_router, prefix=f"{settings.API_V1_STR}/data")
 
 if __name__ == "__main__":
     # Приложение может запускаться командой

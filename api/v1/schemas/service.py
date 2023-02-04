@@ -10,3 +10,14 @@ class DeleteBase(BaseModel):
                 "deleted": "True",
             },
         }
+
+
+class TestDataBase(BaseModel):
+    push_test_data: bool
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "push_test_data": "True",
+            },
+        }
