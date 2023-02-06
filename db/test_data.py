@@ -1,97 +1,85 @@
-TEST_DATA = [
+TEST_DATA: list[dict] = [
     {
-        'menu': {
+        "menu": {
             "title": "Основное меню",
             "description": "Нестареющая классика",
         },
-        'submenus': [
+        "submenus": [
             {
-                'submenu': {
-                    "title": "Супы",
-                    "description": "Есть ложкой"
-                },
-                'dishes': [
-                    {
-                        "title": "Борщ",
-                        "description": "Как у мамы",
-                        "price": "251.50"
-                    },
+                "submenu": {"title": "Супы", "description": "Есть ложкой"},
+                "dishes": [
+                    {"title": "Борщ", "description": "Как у мамы", "price": "251.50"},
                     {
                         "title": "Куриная лапша",
                         "description": "Решает любую проблему",
-                        "price": "180"
+                        "price": "180",
                     },
-
-                ]
+                ],
             },
             {
-                'submenu': {
+                "submenu": {
                     "title": "Горячие блюда",
-                    "description": "Порции тебе на 1.3% больше"
+                    "description": "Порции теперь на 1.3% больше",
                 },
-                'dishes': [
+                "dishes": [
                     {
                         "title": "Жаркое",
                         "description": "Кортошечка точно прожарилась",
-                        "price": "235.8"
+                        "price": "235.8",
                     },
                     {
                         "title": "Болоньезе",
                         "description": "Мы тоже не итальянцы",
-                        "price": "267"
+                        "price": "267",
                     },
                     {
                         "title": "Запеченная рыба",
                         "description": "Когда-то была в море",
-                        "price": "335.3"
+                        "price": "335.3",
                     },
-                ]
+                ],
             },
-        ]
+        ],
     },
     {
-        'menu': {
+        "menu": {
             "title": "Сезонное меню",
             "description": "Зимой и летом разным цветом",
         },
-        'submenus': [
+        "submenus": [
             {
-                'submenu': {
-                    "title": "Основные блюда",
-                    "description": "На любой вкус"
-                },
-                'dishes': [
+                "submenu": {"title": "Основные блюда", "description": "На любой вкус"},
+                "dishes": [
                     {
                         "title": "Окрошка",
                         "description": "А ведь кому-то нравится",
-                        "price": "190.50"
+                        "price": "190.50",
                     },
                     {
                         "title": "Холодец",
                         "description": "Взмах бабочки может вызвать холодцетрясение",
-                        "price": "230.4"
+                        "price": "230.4",
                     },
-
-                ]
+                ],
             },
             {
-                'submenu': {
+                "submenu": {
                     "title": "Алкогольные напитки",
-                    "description": "Каждый день пятница"
+                    "description": "Каждый день пятница",
                 },
-                'dishes': [
+                "dishes": [
                     {
                         "title": "Глинтвейн",
                         "description": "Согреет и снаружи, и внутри",
-                        "price": "140"
+                        "price": "140",
                     },
                     {
                         "title": "Мохито",
                         "description": "Может лучше чистый ром",
-                        "price": "200.05"
+                        "price": "200.05",
                     },
-                ]
+                ],
             },
-        ]
-    }
+        ],
+    },
 ]

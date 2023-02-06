@@ -7,6 +7,7 @@ from pydantic import BaseSettings
 class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     APP_NAME: str
+    APP_MEDIA_PATH: str
     POSTGRES_DB: str
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
@@ -16,6 +17,8 @@ class Settings(BaseSettings):
     REDIS_CACHE_EXPIRE_IN_SECONDS: int
     REDIS_HOST: str
     REDIS_PORT: int
+    CELERY_BROKER_URL: str
+    CELERY_BACKEND_URL: str
 
     class Config:
         env_file = find_dotenv(filename=".env.dev", usecwd=True)

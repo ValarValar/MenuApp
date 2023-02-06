@@ -1,11 +1,10 @@
 import uvicorn
 from fastapi import FastAPI
 
+from api.v1.resources.data import router as data_router
 from api.v1.resources.dishes import router as dishes_router
 from api.v1.resources.menus import router as menus_router
 from api.v1.resources.submenus import router as submenus_router
-from api.v1.resources.data import router as data_router
-
 from core.config import get_settings
 
 settings = get_settings()
@@ -19,7 +18,7 @@ app = FastAPI(
 )
 
 
-@app.get(f"{settings.API_V1_STR}/")
+@app.get("/")
 async def root():
     return {"message": "Hello World"}
 
