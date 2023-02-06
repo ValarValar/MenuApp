@@ -52,6 +52,6 @@ async def get_task_status(task_id: str):
         return FileResponse(
             path=task_result.result,
             filename=task_result.result,
-            media_type="multipart/form-data",
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
     return result

@@ -10,10 +10,10 @@ from db.cache.base import AbstractCache
 from db.cache.RedisCache import get_redis_cache
 from db.db import get_session
 from db.uow import SqlModelUnitOfWork
-from services.mixin import ServiceMixin
+from services.mixin import ServiceBase
 
 
-class DishService(ServiceMixin):
+class DishService(ServiceBase):
     list_cache_key = "dish-list"
 
     async def clear_cache(

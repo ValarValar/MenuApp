@@ -16,10 +16,10 @@ from db.cache.base import AbstractCache
 from db.cache.RedisCache import get_redis_cache
 from db.db import get_session
 from db.uow import SqlModelUnitOfWork
-from services.mixin import ServiceMixin
+from services.mixin import ServiceBase
 
 
-class SubmenuService(ServiceMixin):
+class SubmenuService(ServiceBase):
     list_cache_key = "submenu-list"
 
     async def clear_cache(self, menu_id: str = "", submenu_id: str = ""):

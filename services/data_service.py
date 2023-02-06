@@ -11,10 +11,10 @@ from db.cache.base import AbstractCache, get_cache
 from db.db import get_session
 from db.test_data import TEST_DATA
 from db.uow import SqlModelUnitOfWork
-from services.mixin import ServiceMixin
+from services.mixin import ServiceBase
 
 
-class DataService(ServiceMixin):
+class DataService(ServiceBase):
     async def fill_db_with_test_data(self) -> TestDataBase:
         for menu in TEST_DATA:
             async with self.uow:
