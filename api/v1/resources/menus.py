@@ -1,6 +1,7 @@
 import http
 
 from fastapi import APIRouter, Depends
+from pydantic.types import UUID
 
 from api.v1.schemas.menus import MenuBase, MenuCreate, MenuDetail, MenuList, MenuUpdate
 from api.v1.schemas.service import DeleteBase
@@ -41,7 +42,7 @@ async def list_menu(menu_service: MenuService = Depends(get_menu_service)):
     status_code=http.HTTPStatus.OK,
 )
 async def get_menu(
-    menu_id: str,
+    menu_id: UUID,
     menu_service: MenuService = Depends(get_menu_service),
 ):
     return await menu_service.get_detail(menu_id)
@@ -55,7 +56,7 @@ async def get_menu(
     status_code=http.HTTPStatus.OK,
 )
 async def update_menu(
-    menu_id: str,
+    menu_id: UUID,
     new_menu: MenuUpdate,
     menu_service: MenuService = Depends(get_menu_service),
 ):
@@ -70,7 +71,7 @@ async def update_menu(
     status_code=http.HTTPStatus.OK,
 )
 async def delete_menu(
-    menu_id: str,
+    menu_id: UUID,
     menu_service: MenuService = Depends(get_menu_service),
 ):
     return await menu_service.delete(menu_id)

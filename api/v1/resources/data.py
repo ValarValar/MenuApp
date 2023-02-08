@@ -2,7 +2,7 @@ import http
 
 from celery.result import AsyncResult
 from fastapi import APIRouter, Depends
-from starlette.responses import FileResponse, JSONResponse
+from starlette.responses import FileResponse, JSONResponse, Response
 
 from api.v1.schemas.service import TestDataBase
 from celery_worker import data_to_excel_task
@@ -41,17 +41,20 @@ async def create_convert_task():
     tags=["data"],
     status_code=http.HTTPStatus.OK,
 )
-async def get_task_status(task_id: str):
+async def get_task_status(task_id: str) -> Response:
     task_result = AsyncResult(task_id)
-    result = {
-        "task_id": task_id,
-        "task_status": task_result.status,
-        "task_result": task_result.result,
-    }
     if task_result.ready():
         return FileResponse(
             path=task_result.result,
             filename=task_result.result,
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
+
+    result = JSONResponse(
+        {
+            "task_id": task_id,
+            "task_status": task_result.status,
+            "task_result": task_result.result,
+        }
+    )
     return result

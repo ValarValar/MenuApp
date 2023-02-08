@@ -1,6 +1,7 @@
 import http
 
 from fastapi import APIRouter, Depends
+from pydantic.types import UUID
 
 from api.v1.schemas.service import DeleteBase
 from api.v1.schemas.submenus import (
@@ -23,7 +24,7 @@ router = APIRouter()
     status_code=http.HTTPStatus.CREATED,
 )
 async def create_submenu(
-    menu_id: str,
+    menu_id: UUID,
     submenu: SubmenuBase,
     submenu_service: SubmenuService = Depends(get_submenu_service),
 ):
@@ -38,7 +39,7 @@ async def create_submenu(
     status_code=http.HTTPStatus.OK,
 )
 async def list_submenu(
-    menu_id: str,
+    menu_id: UUID,
     submenu_service: SubmenuService = Depends(get_submenu_service),
 ):
     return await submenu_service.get_list(menu_id)
@@ -52,8 +53,8 @@ async def list_submenu(
     status_code=http.HTTPStatus.OK,
 )
 async def get_submenu(
-    menu_id: str,
-    submenu_id: str,
+    menu_id: UUID,
+    submenu_id: UUID,
     submenu_service: SubmenuService = Depends(get_submenu_service),
 ):
     return await submenu_service.get_detail(menu_id, submenu_id)
@@ -67,8 +68,8 @@ async def get_submenu(
     status_code=http.HTTPStatus.OK,
 )
 async def update_submenu(
-    menu_id: str,
-    submenu_id: str,
+    menu_id: UUID,
+    submenu_id: UUID,
     new_submenu: SubmenuUpdate,
     submenu_service: SubmenuService = Depends(get_submenu_service),
 ):
@@ -83,8 +84,8 @@ async def update_submenu(
     status_code=http.HTTPStatus.OK,
 )
 async def delete_submenu(
-    menu_id: str,
-    submenu_id: str,
+    menu_id: UUID,
+    submenu_id: UUID,
     submenu_service: SubmenuService = Depends(get_submenu_service),
 ):
     return await submenu_service.delete(menu_id, submenu_id)

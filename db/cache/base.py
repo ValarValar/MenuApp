@@ -6,27 +6,34 @@ __all__ = (
     "get_cache",
 )
 
+from pydantic.types import UUID
+
 
 class AbstractCache(ABC):
     def __init__(self, cache_instance):
         self.cache = cache_instance
 
     @abstractmethod
-    def get(self, key: str):
+    def get(self, key: Union[str, UUID]):
         pass
 
     @abstractmethod
     def set(
         self,
-        key: str,
+        key: Union[str, UUID],
         value: Union[bytes, str],
         expire: int = 600,
     ):
         pass
 
     @abstractmethod
-    def delete(self, key: str):
+    def delete(self, key: Union[str, UUID]):
         self.cache.delete(key)
+
+    @abstractmethod
+    def delete_list_keys(self, keys: list[Union[str, UUID]]):
+        for key in keys:
+            self.delete(key)
 
     @abstractmethod
     def close(self):

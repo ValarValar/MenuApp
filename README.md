@@ -7,7 +7,7 @@
 - Pytest
 - Redis
 - Celery
-- Rabbitmq (as broker and backend for celery)  
+- Rabbitmq (as broker and backend for celery)
 - pre-commit (linters)
 
 ## Project Setup

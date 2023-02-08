@@ -1,5 +1,6 @@
 from typing import Optional
 
+from pydantic.types import UUID
 from sqlalchemy import func, select
 
 from api.v1.schemas.menus import MenuBase, MenuUpdate
@@ -50,11 +51,11 @@ class MenuRepository(AbstractRepository):
         menus: list[Menu] = results.all()
         return menus
 
-    async def get(self, id: str) -> Optional[Menu]:
+    async def get(self, id: UUID) -> Optional[Menu]:
         menu = await self.session.get(Menu, id)
         return menu
 
-    async def get_detail(self, id: str) -> Optional[Menu]:
+    async def get_detail(self, id: UUID) -> Optional[Menu]:
         subquery = (
             select(
                 Submenu.id,
@@ -97,7 +98,7 @@ class MenuRepository(AbstractRepository):
         menu: Optional[Menu] = results.one_or_none()
         return menu
 
-    async def update(self, id: str, update_menu: MenuUpdate) -> Optional[Menu]:
+    async def update(self, id: UUID, update_menu: MenuUpdate) -> Optional[Menu]:
         if menu := await self.get(id):
             update_menu = update_menu.dict(exclude_unset=True)
             for key, value in update_menu.items():
@@ -105,7 +106,7 @@ class MenuRepository(AbstractRepository):
             self.session.add(menu)
         return menu
 
-    async def delete(self, id: str) -> bool:
+    async def delete(self, id: UUID) -> bool:
         if menu := await self.get(id):
             await self.session.delete(menu)
             return True
