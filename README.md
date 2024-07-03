@@ -11,7 +11,7 @@
 - pre-commit (linters)
 
 ## Project Setup
-__reminder__: don't forger to configure your interpreter and activate venv.
+__reminder__: don't forget to configure your interpreter and activate venv.
 - activate venv
 - pip install docker
 - docker compose -f docker-compose.yml --env-file .env.dev up -d --build
